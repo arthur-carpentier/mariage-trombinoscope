@@ -168,8 +168,15 @@ select { font: inherit; font-weight: 700; color: var(--ink); background: var(--w
 .card--wait:hover, .card--wait:focus-visible { opacity: 0.95; }
 .card__ok { position: absolute; top: 10px; left: 10px; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: var(--green); color: var(--white); }
 .card__ok svg { width: 13px; height: 13px; }
-.ok-pill { display: inline-flex; align-items: center; gap: 6px; font-weight: 800; font-size: .9rem; color: var(--green); }
-.ok-pill--wait { color: var(--ink-soft); }
+.ok-pill { display: inline-flex; align-items: center; gap: 8px; font-weight: 800; font-size: .9rem; color: var(--green); }
+.ok-pill--wait { color: var(--rose); }
+.rep { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; vertical-align: middle; }
+.rep svg { width: 13px; height: 13px; }
+.rep--ok { background: var(--green); color: var(--white); }
+.rep--wait { background: var(--rose-light); color: var(--rose); }
+.rep--big { width: 30px; height: 30px; }
+.rep--big svg { width: 17px; height: 17px; }
+.gtable thead th.tev[data-sort^="ev:"] { font-size: 1rem; letter-spacing: 0; }
 .card__plus1 {
   position: absolute; top: 10px; right: 10px; font-size: 0.7rem; font-weight: 800; color: var(--rose);
   background: var(--rose-light); border-radius: 999px; padding: 1px 7px;
@@ -235,6 +242,8 @@ select { font: inherit; font-weight: 700; color: var(--ink); background: var(--w
 .gtable .tag { margin-left: 4px; }
 .gtable tr.is-wait { filter: grayscale(0.5); opacity: 0.75; }
 #view-seg button[aria-pressed="true"] { background: var(--rose); }
+/* pictogramme « accompagnant » (remplace le +1) */
+.acc-i { width: 1.15em; height: 1.15em; fill: currentColor; vertical-align: -0.2em; display: inline-block; }
 .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 0.8rem; color: var(--ink-soft); font-weight: 700; align-items: center; }
 .legend .ev { width: 20px; height: 20px; font-size: 0.6rem; }
 .legend span { display: inline-flex; gap: 6px; align-items: center; }
@@ -343,6 +352,7 @@ svg text { font-family: var(--font-body); }
 </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="acc-sym" viewBox="0 0 24 24"><circle cx="9" cy="7.6" r="3.4"/><path d="M2.6 19.4c0-3.6 2.9-6 6.4-6s6.4 2.4 6.4 6z"/><circle cx="16.8" cy="8.8" r="2.7"/><path d="M14.6 13.8c.7-.3 1.4-.4 2.2-.4 3 0 5.2 2 5.2 5.9h-5.1c-.1-2.2-1-4-2.3-5.5z"/></symbol></svg>
 
 <header class="hero">
   <div class="wrap">
@@ -401,7 +411,7 @@ svg text { font-family: var(--font-body); }
               <option value="groupe">Bande / foyer</option>
               <option value="none">Aucun regroupement</option>
             </select>
-            <label class="toggle"><input type="checkbox" id="show-p1" checked> Afficher les +1 potentiels</label>
+            <label class="toggle"><input type="checkbox" id="show-p1" checked> Afficher les <svg class="acc-i" role="img" aria-label="accompagnants"><use href="#acc-sym"/></svg> possibles</label>
             <label class="toggle"><input type="checkbox" id="show-age"> Afficher les âges</label>
             <label class="lbl" for="reponse">Réponse</label>
             <select id="reponse"><option value="">Toutes</option><option value="ok">Validé</option><option value="wait">En attente</option></select>
@@ -444,8 +454,8 @@ svg text { font-family: var(--font-body); }
           <span><i class="dot" style="background: var(--blue)"></i>Côté Arthur</span>
           <span><i class="dot" style="background: var(--rose)"></i>Côté Mathilde</span>
           <span><i class="dot" style="background: var(--ink-soft)"></i>À préciser</span>
-          <span><i class="dot" style="background: var(--white); border: 1.5px solid var(--ink-soft)"></i>Accompagnant (+1), relié à son invité par un trait</span>
-          <span>« +1 » après un nom : +1 possible, pas encore connu</span>
+          <span><i class="dot" style="background: var(--white); border: 1.5px solid var(--ink-soft)"></i>Accompagnant, relié à son invité par un trait</span>
+          <span><svg class="acc-i" style="color:var(--rose)" aria-hidden="true"><use href="#acc-sym"/></svg> après un nom : accompagnant possible, pas encore connu</span>
         </div>
         <div class="scroll-x radial-wrap"><svg id="radial" style="min-width: 900px; width: 100%; max-width: 1180px; height: auto;" role="img" aria-label="Diagramme radial des invités"></svg></div>
       </div>
@@ -491,6 +501,12 @@ svg text { font-family: var(--font-body); }
 const RAW = INVITES; // liste chargée depuis data/invites.js
 
 /* ---------- Données ---------- */
+const ACC = `<svg class="acc-i" role="img" aria-label="accompagnant"><use href="#acc-sym"/></svg>`;
+const EV_EMOJI = { mairie: "🏛️", eglise: "⛪", vin: "🥂", repas: "🍽️", brunch: "🥐" };
+/* réponse à l'invitation : pastille aux couleurs de la charte (vert sauge = validé, rose = en attente) */
+const repIcon = (g, big) => g.valide
+  ? `<span class="rep rep--ok${big ? " rep--big" : ""}" role="img" aria-label="Validé" title="Validé"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>`
+  : `<span class="rep rep--wait${big ? " rep--big" : ""}" role="img" aria-label="En attente" title="En attente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg></span>`;
 const EVENTS = [
   { k: "mairie", l: "Mairie", s: "M" },
   { k: "eglise", l: "Église", s: "É" },
@@ -507,7 +523,7 @@ const guests = RAW.map(g => ({ ...g, nomAff: g.nom, todo: [] }));
 guests.forEach(g => {
   if (g.groupe === "Marié") { g.cote = "Arthur"; g.lien = "Mariés"; g.couple = true; }
   if (g.groupe === "Mariée") { g.cote = "Mathilde"; g.lien = "Mariés"; g.couple = true; }
-  if (g.lien === "Travail") g.groupe = g.cote === "Arthur" ? "VOTREX" : (g.groupe || "Travail");
+  if (g.lien === "Travail") g.groupe = g.groupe || "Travail";
   if (["Ami proche", "Copains", "Travail"].includes(g.lien)) g.lien = "Amis";
   if (g.groupe === "Belges") g.lien = "Famille éloignée";
   g.naissance = g.naissance || null; // date de naissance AAAA-MM-JJ, à renseigner
@@ -525,7 +541,7 @@ const fullName = g => `${g.prenom.replace(" ?", "")} ${g.nom ? cap(g.nom) : ""}`
 const PLUS = {}; people.forEach(g => { if (g.plusOneOf) PLUS[g.plusOneOf] = g; });
 // règle : un +1 hérite des invitations (et du côté, du lien, de la bande) de la personne qu'il accompagne
 // evOverride : exception propre au +1 (ex. ne vient pas au repas)
-people.forEach(g => { const h = g.plusOneOf && byId[g.plusOneOf]; if (h) Object.assign(g, { ev: { ...h.ev, ...(g.evOverride || {}) }, cote: h.cote, lien: h.lien, groupe: h.groupe }); });
+people.forEach(g => { const h = g.plusOneOf && byId[g.plusOneOf]; if (h) Object.assign(g, { ev: { ...h.ev, ...(g.evOverride || {}) }, cote: h.cote, lien: h.lien, groupe: h.groupe === "Travail" ? "" : h.groupe }); }); // un +1 ne fait pas partie de la bande Travail
 const openP1 = g => g.plus1 && !PLUS[g.id];
 const hostOf = g => g.plusOneOf ? byId[g.plusOneOf] : null;
 const plusOnes = people.filter(openP1).map(g => ({ id: "p" + g.id, of: g.id, ghost: true }));
@@ -641,12 +657,12 @@ function renderStats() {
   const total = guests.length;
   const p1 = plusOnes.length;
   const ok = guests.filter(g => g.valide).length;
-  const html = [`<div class="stat"><span class="stat__n">${total}</span><span class="stat__l">invités</span><span class="stat__p">+ ${p1} accompagnants possibles</span></div>`,
+  const html = [`<div class="stat"><span class="stat__n">${total + p1}</span><span class="stat__l">invités</span><span class="stat__p">dont ${p1} ${ACC} à valider</span></div>`,
     `<div class="stat"><span class="stat__n" style="color:var(--green)">${ok}</span><span class="stat__l">ont validé</span><span class="stat__p" style="color:var(--ink-soft)">${total - ok} en attente</span></div>`];
   EVENTS.forEach(e => {
     const n = guests.filter(g => g.ev[e.k]).length;
     const pp = people.filter(g => g.ev[e.k] && openP1(g)).length;
-    html.push(`<div class="stat"><span class="stat__n">${n}</span><span class="stat__l">${e.l}</span><span class="stat__p">${pp ? "+ " + pp + " possibles" : "&nbsp;"}</span></div>`);
+    html.push(`<div class="stat"><span class="stat__n">${n + pp}</span><span class="stat__l">${e.l}</span><span class="stat__p">${pp ? `dont ${pp} ${ACC} à valider` : "&nbsp;"}</span></div>`);
   });
   document.getElementById("stats").innerHTML = html.join("");
 }
@@ -670,27 +686,27 @@ const linkIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" str
 const checkIcon = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>`;
 function card(g) {
   return `<article class="card${g.valide ? "" : " card--wait"}" data-side="${g.cote}" data-id="${g.id}" tabindex="0" aria-label="${fullName(g)}${g.valide ? ", a validé" : ", en attente de réponse"}"${g.valide ? "" : ` title="En attente de réponse"`}>
-    ${openP1(g) ? `<span class="card__plus1" title="Peut venir accompagné">+1</span>` : ""}
+    ${openP1(g) ? `<span class="card__plus1" title="Peut venir accompagné" role="img" aria-label="Peut venir accompagné">${ACC}</span>` : ""}
     ${avatar(g)}
     <div class="card__name">${g.prenom.replace(" ?", "") || "?"}<span class="card__nom">${g.nom || ""}</span></div>
     ${state.ages ? `<span class="card__age${ageOf(g) === null ? " card__age--todo" : ""}" title="${g.naissance ? "Né(e) le " + dateFr(g.naissance) : "Date de naissance à renseigner"}">${ageTxt(g)}</span>` : ""}
     ${tags(g)}
-    ${hostOf(g) ? `<span class="link-hint">${linkIcon} +1 de ${hostOf(g).prenom}</span>` : ""}
+    ${hostOf(g) ? `<span class="link-hint">${ACC} accompagne ${hostOf(g).prenom}</span>` : ""}
   </article>`;
 }
 function ghostCard(g) {
   return `<article class="card card--ghost${g.valide ? "" : " card--wait"}" data-side="${g.cote}" aria-label="Accompagnant possible de ${fullName(g)}">
-    <span class="avatar avatar--ghost">+1</span>
+    <span class="avatar avatar--ghost">${ACC}</span>
     <div class="card__name">Accompagnant<span class="card__nom">à confirmer</span></div>
-    <span class="link-hint">${linkIcon} +1 de ${g.prenom}</span>
+    <span class="link-hint">${linkIcon} accompagne ${g.prenom}</span>
   </article>`;
 }
 
 /* ---------- Vue tableau ---------- */
 const COLS = [
   { k: "nom", l: "Invité" }, { k: "cote", l: "Côté" }, { k: "lien", l: "Lien" }, { k: "sub", l: "Bande, foyer" },
-  ...EVENTS.map(e => ({ k: "ev:" + e.k, l: e.s, title: e.l, ev: true })),
-  { k: "p1", l: "+1" }, { k: "rep", l: "Réponse" }, { k: "age", l: "Âge", opt: "ages" },
+  ...EVENTS.map(e => ({ k: "ev:" + e.k, l: `<span role="img" aria-label="${e.l}">${EV_EMOJI[e.k]}</span>`, title: e.l, ev: true })),
+  { k: "p1", l: `<svg class="acc-i" role="img" aria-label="Accompagnant"><use href="#acc-sym"/></svg>`, title: "Accompagnant" }, { k: "rep", l: "Réponse", ev: true }, { k: "age", l: "Âge", opt: "ages" },
 ];
 const cols = () => COLS.filter(c => !c.opt || state[c.opt]); // l'âge suit la case « Afficher les âges »
 const sortVal = (g, k) => k === "nom" ? `${g.nom} ${g.prenom}` : k === "cote" ? g.cote : k === "lien" ? (ROLE[g.id] || g.lien) : k === "sub" ? (sub(g) || "")
@@ -704,19 +720,19 @@ const yes = `<span class="tcheck" title="Invité">${checkIcon}</span>`, no = `<s
 function row(g, host) {
   const p1 = PLUS[g.id] ? `<button class="tlink" data-id="${PLUS[g.id].id}">${PLUS[g.id].prenom}</button>` : openP1(g) ? `<span class="tmuted">possible</span>` : "";
   return `<tr class="${g.valide ? "" : "is-wait"}${host ? " trow--plus" : ""}" data-id="${g.id}" tabindex="0">
-    <th scope="row" class="tperson">${host ? `<span class="tplus" aria-hidden="true">↳</span>` : ""}${avatar(g)}<span><b>${g.prenom}</b> ${g.nom}${host ? `<small>+1 de ${host.prenom}</small>` : ""}</span></th>
+    <th scope="row" class="tperson">${host ? `<span class="tplus" aria-hidden="true">↳</span>` : ""}${avatar(g)}<span><b>${g.prenom}</b> ${g.nom}${host ? `<small>accompagne ${host.prenom}</small>` : ""}</span></th>
     <td>${g.cote ? `<span class="tag tag--side-${g.cote}">${g.cote}</span>` : ""}</td>
     <td>${ROLE[g.id] || (g.lien && g.lien !== "Autre" ? LIEN_LABEL[g.lien] : "")}${(EXTRA[g.id] || []).filter(x => /^Témoin/.test(x) || /(d'Arthur|de Mathilde)$/.test(x)).map(x => `<span class="tag tag--special">${x}</span>`).join("")}</td>
     <td>${ROLE[g.id] ? "" : (sub(g) || "")}</td>
     ${EVENTS.map(e => `<td class="tev">${g.ev[e.k] ? yes : no}</td>`).join("")}
     <td>${p1}</td>
-    <td>${g.valide ? `<span class="tok">Validé</span>` : `<span class="tmuted">En attente</span>`}</td>
+    <td class="tev">${repIcon(g)}</td>
     ${state.ages ? `<td class="tnum">${ageOf(g) === null ? `<span class="tmuted">?</span>` : ageTxt(g)}</td>` : ""}
   </tr>`;
 }
 function ghostRow(g) {
   return `<tr class="trow--plus trow--ghost${g.valide ? "" : " is-wait"}">
-    <th scope="row" class="tperson"><span class="tplus" aria-hidden="true">↳</span><span class="avatar avatar--ghost">+1</span><span><b>Accompagnant</b> à confirmer<small>+1 de ${g.prenom}</small></span></th>
+    <th scope="row" class="tperson"><span class="tplus" aria-hidden="true">↳</span><span class="avatar avatar--ghost">${ACC}</span><span><b>Accompagnant</b> à confirmer<small>accompagne ${g.prenom}</small></span></th>
     <td></td><td></td><td></td>${EVENTS.map(e => `<td class="tev">${g.ev[e.k] ? yes : no}</td>`).join("")}<td></td><td></td>${state.ages ? "<td></td>" : ""}
   </tr>`;
 }
@@ -776,8 +792,8 @@ function renderTrombi() {
   // même base que les chiffres du haut : +1 nommés compris ; les mariés ne sont pas dans la grille
   const maries = guests.filter(g => g.couple && matches(g)).length;
   const total = all.length + maries + (state.p1 ? p1count : 0);
-  const dont = [maries ? (maries === 2 ? "les 2 mariés" : "1 marié") : "", state.p1 && p1count ? `${p1count} +1 à confirmer` : ""].filter(Boolean);
-  document.getElementById("count").textContent = `${total} invité${total > 1 ? "s" : ""}${dont.length ? ` (dont ${dont.join(" et ")})` : ""}`;
+  const dont = [maries ? (maries === 2 ? "les 2 mariés" : "1 marié") : "", state.p1 && p1count ? `${p1count} ${ACC} à confirmer` : ""].filter(Boolean);
+  document.getElementById("count").innerHTML = `${total} invité${total > 1 ? "s" : ""}${dont.length ? ` (dont ${dont.join(" et ")})` : ""}`;
 }
 function wireTrombi() {
   document.getElementById("q").addEventListener("input", e => { state.q = e.target.value.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase().trim(); renderTrombi(); });
@@ -833,7 +849,7 @@ function openDrawer(id) {
         ${(EXTRA[g.id] || []).map(x => `<span class="tag tag--special">${x}</span>`).join("")}
         ${sub(g) && !g.couple && !ROLE[g.id] ? `<span class="tag tag--groupe">${sub(g)}</span>` : ""}
       </div></div></div>
-    <div><h3>Réponse à l'invitation</h3>${g.valide ? `<span class="ok-pill">${checkIcon} Validé</span>` : `<span class="ok-pill ok-pill--wait">En attente de réponse</span>`}</div>
+    <div><h3>Réponse à l'invitation</h3><span class="ok-pill${g.valide ? "" : " ok-pill--wait"}">${repIcon(g, true)}${g.valide ? "Validé" : "En attente de réponse"}</span></div>
     <div><h3>Âge</h3><p style="margin:0;font-size:.95rem;font-weight:700">${g.naissance ? `${ageTxt(g)}, ${gw(g.prenom, "né", "née")} le ${dateFr(g.naissance)}${g.naissance.includes("X") ? `<br><span style="color:var(--ink-soft);font-weight:600;font-size:.85rem">Année incomplète : l'âge est donné en fourchette.</span>` : ""}` : `<span style="color:var(--ink-soft);font-weight:600">Date de naissance à renseigner. L'âge sera calculé automatiquement à la date du jour.</span>`}</p></div>
     ${g.photo ? "" : `<div class="photo-drop">Pas encore de photo : les initiales s'affichent à la place.</div>`}
     ${(() => {
@@ -852,7 +868,7 @@ function openDrawer(id) {
     <div><h3>Invitations</h3><div class="evlist">${EVENTS.map(e => `<div><span>${e.l}</span><span class="${g.ev[e.k] ? "yes" : "no"}">${g.ev[e.k] ? "Oui" : "Non"}</span></div>`).join("")}</div></div>
     ${PLUS[g.id] ? `<div><h3>Accompagnant</h3><div class="mini"><button data-id="${PLUS[g.id].id}">${avatar(PLUS[g.id])}${fullName(PLUS[g.id])}</button></div></div>` : ""}
     ${hostOf(g) ? `<div><h3>Accompagne</h3><div class="mini"><button data-id="${hostOf(g).id}">${avatar(hostOf(g))}${fullName(hostOf(g))}</button></div></div>` : ""}
-    ${openP1(g) ? `<div><h3>Accompagnant</h3><div class="mini"><button disabled style="cursor:default">${`<span class="avatar avatar--ghost">+1</span>`}Nom à confirmer</button></div><p style="font-size:.82rem;color:var(--ink-soft);margin:6px 0 0">Une fois le nom connu, le +1 devient un invité à part entière, relié à ${g.prenom}.</p></div>` : ""}
+    ${openP1(g) ? `<div><h3>Accompagnant</h3><div class="mini"><button disabled style="cursor:default"><span class="avatar avatar--ghost">${ACC}</span>Nom à confirmer</button></div><p style="font-size:.82rem;color:var(--ink-soft);margin:6px 0 0">Une fois le nom connu, l'accompagnant devient un invité à part entière, relié à ${g.prenom}.</p></div>` : ""}
     ${sameGroup.length ? `<div><h3>Même bande : ${g.groupe}</h3>${mini(sameGroup)}</div>` : ""}
     ${sameFam.length ? `<div><h3>${g.lien === "Famille éloignée" ? "Même foyer : " + g.foyer : "Famille proche côté " + g.cote}</h3>${mini(sameFam)}</div>` : ""}
 `;
@@ -939,12 +955,12 @@ function renderTree() {
       <text x="${p.x}" y="${p.y + 5}" text-anchor="middle" fill="#FFFFFF" font-size="${g.couple ? 15 : 13}" font-weight="800">${initials(g)}</text>
       <text x="${p.x}" y="${p.y + r + 16}" text-anchor="middle" fill="#34526A" font-size="12.5" font-weight="800">${g.prenom}</text>
       <text x="${p.x}" y="${p.y + r + 29}" text-anchor="middle" fill="#5d7488" font-size="9.5" font-weight="700" letter-spacing=".4">${g.nom}</text>
-      ${openP1(g) ? `<g><circle cx="${p.x + r * 0.8}" cy="${p.y + r * 0.7}" r="10" fill="#FFFFFF" stroke="#B05078" stroke-width="1.5" stroke-dasharray="3 2"/><text x="${p.x + r * 0.8}" y="${p.y + r * 0.7 + 3.5}" text-anchor="middle" font-size="9" font-weight="800" fill="#B05078">+1</text></g>` : ""}
+      ${openP1(g) ? `<g><circle cx="${p.x + r * 0.8}" cy="${p.y + r * 0.7}" r="10" fill="#FFFFFF" stroke="#B05078" stroke-width="1.5" stroke-dasharray="3 2"/><text x="${p.x + r * 0.8}" y="${p.y + r * 0.7 + 3.5}" text-anchor="middle" font-size="0"></text><use href="#acc-sym" x="${p.x + r * 0.8 - 6}" y="${p.y + r * 0.7 - 6}" width="12" height="12" fill="#B05078"/></g>` : ""}
     </g>`;
     const pt = PLUS[g.id];
     if (pt) {
       const pc = pt.cote === "Arthur" ? "#3A6E8C" : "#B05078";
-      s += `<g class="tree-node${pt.valide || !g.valide ? "" : " is-wait"}" data-id="${pt.id}" role="button" aria-label="${fullName(pt)}, +1 de ${g.prenom}"><circle cx="${p.x + r * 0.8}" cy="${p.y + r * 0.7}" r="11" fill="${pc}" stroke="#FFFFFF" stroke-width="2"/><text x="${p.x + r * 0.8}" y="${p.y + r * 0.7 + 3.5}" text-anchor="middle" font-size="8.5" font-weight="800" fill="#FFFFFF">${initials(pt)}</text></g>`;
+      s += `<g class="tree-node${pt.valide || !g.valide ? "" : " is-wait"}" data-id="${pt.id}" role="button" aria-label="${fullName(pt)}, accompagne ${g.prenom}"><circle cx="${p.x + r * 0.8}" cy="${p.y + r * 0.7}" r="11" fill="${pc}" stroke="#FFFFFF" stroke-width="2"/><text x="${p.x + r * 0.8}" y="${p.y + r * 0.7 + 3.5}" text-anchor="middle" font-size="8.5" font-weight="800" fill="#FFFFFF">${initials(pt)}</text></g>`;
     }
   });
   const H = Y[3] + R + 50;
@@ -971,9 +987,9 @@ function renderLoose(side) {
   // liste simple, sans répartition ; les témoins d'abord ; un +1 renseigné s'affiche en pastille sur son hôte
   const rest = people.filter(g => g.cote === side && !IN_TREE.has(g.id) && !g.plusOneOf)
     .sort((a, b) => (!!TEMOIN_OF[b.id] - !!TEMOIN_OF[a.id]) || (!a.nom - !b.nom) || (a.nom || "").localeCompare(b.nom || "") || a.prenom.localeCompare(b.prenom));
-  const pill = g => PLUS[g.id] ? `<span class="p1pill${PLUS[g.id].valide || !g.valide ? "" : " is-wait"}" data-id="${PLUS[g.id].id}" data-side="${PLUS[g.id].cote}" title="+1 : ${fullName(PLUS[g.id])}">${initials(PLUS[g.id])}</span>`
-    : openP1(g) ? `<span class="p1pill p1pill--open" title="+1 à confirmer">+1</span>` : "";
-  const node = g => `<button class="lnode${TEMOIN_OF[g.id] ? " lnode--temoin" : ""}${g.valide ? "" : " is-wait"}" data-id="${g.id}"${TEMOIN_OF[g.id] ? ` data-of="${TEMOIN_OF[g.id]}"` : ""}><span class="lwrap">${avatar(g)}${pill(g)}</span><b>${g.prenom.replace(" ?", "") || "?"}</b><small>${g.nom || ""}${PLUS[g.id] ? `<br>+ ${PLUS[g.id].prenom}` : ""}</small>${TEMOIN_OF[g.id] ? `<span class="temoin-badge">Témoin</span>` : ""}</button>`;
+  const pill = g => PLUS[g.id] ? `<span class="p1pill${PLUS[g.id].valide || !g.valide ? "" : " is-wait"}" data-id="${PLUS[g.id].id}" data-side="${PLUS[g.id].cote}" title="Accompagnant : ${fullName(PLUS[g.id])}">${initials(PLUS[g.id])}</span>`
+    : openP1(g) ? `<span class="p1pill p1pill--open" title="Accompagnant à confirmer">${ACC}</span>` : "";
+  const node = g => `<button class="lnode${TEMOIN_OF[g.id] ? " lnode--temoin" : ""}${g.valide ? "" : " is-wait"}" data-id="${g.id}"${TEMOIN_OF[g.id] ? ` data-of="${TEMOIN_OF[g.id]}"` : ""}><span class="lwrap">${avatar(g)}${pill(g)}</span><b>${g.prenom.replace(" ?", "") || "?"}</b><small>${g.nom || ""}${PLUS[g.id] ? `<br>${ACC} ${PLUS[g.id].prenom}` : ""}</small>${TEMOIN_OF[g.id] ? `<span class="temoin-badge">Témoin</span>` : ""}</button>`;
   document.getElementById("loose-" + (side || "none")).innerHTML = rest.length ? `<div class="loose__people">${rest.map(node).join("")}</div>` : "";
   if (!side) document.getElementById("none-col").hidden = !rest.length;
 }
@@ -993,8 +1009,10 @@ function renderRadial() {
       const ln = { name: LIEN_LABEL[l], key: `l:${side}:${l}`, side, children: [] };
       const subs = new Map();
       // une bande d'une seule personne rejoint les invités sans bande
-      const cnt = {}; arr.forEach(g => { const k = sub(g) || ""; cnt[k] = (cnt[k] || 0) + 1; });
-      arr.forEach(g => { let k = sub(g) || ""; if (cnt[k] < 2) k = ""; if (!subs.has(k)) subs.set(k, []); subs.get(k).push(g); });
+      // un +1 est placé dans la branche de la personne qu'il accompagne, pour rester à côté d'elle
+      const keyOfR = g => sub(hostOf(g) || g) || "";
+      const cnt = {}; arr.forEach(g => { const k = keyOfR(g); cnt[k] = (cnt[k] || 0) + 1; });
+      arr.forEach(g => { let k = keyOfR(g); if (cnt[k] < 2) k = ""; if (!subs.has(k)) subs.set(k, []); subs.get(k).push(g); });
       [...subs.entries()].forEach(([k, gs]) => {
         // chaque +1 renseigné est placé juste après la personne qu'il accompagne
         const ordered = gs.filter(g => !(hostOf(g) && gs.includes(hostOf(g)))).flatMap(g => PLUS[g.id] && gs.includes(PLUS[g.id]) ? [g, PLUS[g.id]] : [g]);
@@ -1043,7 +1061,8 @@ function renderRadial() {
           .each(function (d) { this.__p = { x: d.x, y: d.y }; });
         g.append("circle").attr("stroke-width", 1.5);
         g.filter(d => !d.children && d.data.id).append("text").attr("dy", "0.32em").attr("font-size", 10.5).attr("font-weight", 700).attr("fill", "#34526A")
-          .text(d => d.data.name + (d.data.p1 ? " +1" : ""));
+          .text(d => d.data.name);
+        g.filter(d => d.data.p1).append("use").attr("class", "acc-r").attr("href", "#acc-sym").attr("width", 11).attr("height", 11).attr("fill", "#B05078");
         return g;
       },
       update => update,
@@ -1058,6 +1077,10 @@ function renderRadial() {
       .attr("x", d => d.x < Math.PI ? 7 : -7)
       .attr("text-anchor", d => d.x < Math.PI ? "start" : "end")
       .attr("transform", d => d.x >= Math.PI ? "rotate(180)" : null))
+    .call(g => g.select("use.acc-r").each(function (d) {
+      const tx = this.parentNode.querySelector("text"), w = tx ? tx.getComputedTextLength() : 0, off = 7 + w + 4;
+      d3.select(this).attr("x", d.x < Math.PI ? off : -off - 11).attr("y", -5.5).attr("transform", d.x >= Math.PI ? "rotate(180)" : null);
+    }))
     .transition(tr).attr("opacity", 1)
     .attrTween("transform", function (d) {
       const p = this.__p || { x: d.x, y: d.y }, i = d3.interpolate(p, { x: d.x, y: d.y }); this.__p = { x: d.x, y: d.y };
@@ -1091,7 +1114,7 @@ function applyArbreFilter() {
   const n = guests.filter(arbreMatch).length, p = people.filter(g => openP1(g) && arbreMatch(g)).length;
   const c = document.getElementById("arbre-count");
   c.hidden = !arbreEvs.size;
-  c.innerHTML = arbreEvs.size ? `${n + p} personnes${p ? `, dont ${p} +1 à confirmer` : ""}<button type="button" id="arbre-reset">Tout afficher</button>` : "";
+  c.innerHTML = arbreEvs.size ? `${n + p} personnes${p ? `, dont ${p} ${ACC} à confirmer` : ""}<button type="button" id="arbre-reset">Tout afficher</button>` : "";
   if (radialDone) renderRadial();
 }
 document.getElementById("arbre-ev").innerHTML = EVENTS.map(e => `<button data-ev="${e.k}" aria-pressed="false">${e.l}</button>`).join("");
@@ -1115,7 +1138,7 @@ function renderTables() {
   const by = new Map();
   repas.forEach(g => { const k = g.lien || ""; if (!by.has(k)) by.set(k, []); by.get(k).push(g); });
   document.getElementById("toplace").innerHTML = [...LIENS, ""].filter(k => by.has(k)).map(k =>
-    `<h4>${LIEN_LABEL[k]} (${by.get(k).length})</h4>` + by.get(k).map(g => `<div class="seatable" data-id="${g.id}">${avatar(g)}<span>${fullName(g)}</span>${openP1(g) ? "<small>+1</small>" : ""}</div>`).join("")).join("");
+    `<h4>${LIEN_LABEL[k]} (${by.get(k).length})</h4>` + by.get(k).map(g => `<div class="seatable" data-id="${g.id}">${avatar(g)}<span>${fullName(g)}</span>${openP1(g) ? `<small>${ACC}</small>` : ""}</div>`).join("")).join("");
 }
 
 
