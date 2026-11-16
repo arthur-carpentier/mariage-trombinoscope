@@ -537,7 +537,7 @@ const fullName = g => `${g.prenom.replace(" ?", "")} ${g.nom ? cap(g.nom) : ""}`
 const PLUS = {}; people.forEach(g => { if (g.plusOneOf) PLUS[g.plusOneOf] = g; });
 // règle : un +1 hérite des invitations (et du côté, du lien, de la bande) de la personne qu'il accompagne
 // evOverride : exception propre au +1 (ex. ne vient pas au repas)
-people.forEach(g => { const h = g.plusOneOf && byId[g.plusOneOf]; if (h) Object.assign(g, { ev: { ...h.ev, ...(g.evOverride || {}) }, cote: h.cote, lien: h.lien, groupe: h.groupe }); });
+people.forEach(g => { const h = g.plusOneOf && byId[g.plusOneOf]; if (h) Object.assign(g, { ev: { ...h.ev, ...(g.evOverride || {}) }, cote: h.cote, lien: h.lien, groupe: h.groupe === "Travail" ? "" : h.groupe }); }); // un +1 ne fait pas partie de la bande Travail
 const openP1 = g => g.plus1 && !PLUS[g.id];
 const hostOf = g => g.plusOneOf ? byId[g.plusOneOf] : null;
 const plusOnes = people.filter(openP1).map(g => ({ id: "p" + g.id, of: g.id, ghost: true }));
@@ -1005,8 +1005,10 @@ function renderRadial() {
       const ln = { name: LIEN_LABEL[l], key: `l:${side}:${l}`, side, children: [] };
       const subs = new Map();
       // une bande d'une seule personne rejoint les invités sans bande
-      const cnt = {}; arr.forEach(g => { const k = sub(g) || ""; cnt[k] = (cnt[k] || 0) + 1; });
-      arr.forEach(g => { let k = sub(g) || ""; if (cnt[k] < 2) k = ""; if (!subs.has(k)) subs.set(k, []); subs.get(k).push(g); });
+      // un +1 est placé dans la branche de la personne qu'il accompagne, pour rester à côté d'elle
+      const keyOfR = g => sub(hostOf(g) || g) || "";
+      const cnt = {}; arr.forEach(g => { const k = keyOfR(g); cnt[k] = (cnt[k] || 0) + 1; });
+      arr.forEach(g => { let k = keyOfR(g); if (cnt[k] < 2) k = ""; if (!subs.has(k)) subs.set(k, []); subs.get(k).push(g); });
       [...subs.entries()].forEach(([k, gs]) => {
         // chaque +1 renseigné est placé juste après la personne qu'il accompagne
         const ordered = gs.filter(g => !(hostOf(g) && gs.includes(hostOf(g)))).flatMap(g => PLUS[g.id] && gs.includes(PLUS[g.id]) ? [g, PLUS[g.id]] : [g]);
