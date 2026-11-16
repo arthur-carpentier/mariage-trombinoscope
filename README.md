@@ -21,7 +21,7 @@ Tout se fait dans `data/invites.js`, une ligne par invité :
 | `nom`, `prenom` | Identité. Les initiales servent tant qu'il n'y a pas de photo. |
 | `cote` | `Arthur` ou `Mathilde` |
 | `lien` | `Famille proche`, `Famille éloignée`, `Ami proche`, `Copains`, `Travail`, `Autre` (les trois amis/travail sont regroupés en « Amis ») |
-| `groupe` | Bande d'amis (ENSAT, EKIP, vorteX-io…) |
+| `groupe` | Bande d'amis (ENSAT, EKIP, Travail…) |
 | `ev` | Invitations : `mairie`, `eglise`, `vin`, `repas`, `brunch` |
 | `plus1` | `true` si la personne peut venir accompagnée |
 | `plusOneOf` | Pour un +1 nommé : `id` de la personne accompagnée. Il en reprend les invitations. |
