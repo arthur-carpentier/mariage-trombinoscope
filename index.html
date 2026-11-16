@@ -208,6 +208,33 @@ select { font: inherit; font-weight: 700; color: var(--ink); background: var(--w
 .link-hint { font-size: 0.74rem; font-weight: 700; color: var(--ink-soft); display: flex; align-items: center; gap: 4px; }
 .link-hint svg { width: 14px; height: 14px; }
 
+/* tableau */
+.tablewrap { overflow-x: auto; background: var(--white); border: 1px solid var(--blue-light); border-radius: var(--radius); box-shadow: var(--shadow); }
+.gtable { width: 100%; border-collapse: collapse; font-size: 0.86rem; min-width: 860px; }
+.gtable thead th { position: sticky; top: 0; background: var(--cream); text-align: left; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-soft); font-weight: 800; padding: 10px 10px; cursor: pointer; white-space: nowrap; user-select: none; border-bottom: 1px solid var(--line); }
+.gtable thead th:hover, .gtable thead th.is-sorted { color: var(--blue); }
+.gtable td, .gtable tbody th { padding: 7px 10px; border-bottom: 1px solid var(--cream); vertical-align: middle; text-align: left; font-weight: 600; }
+.gtable tbody tr { cursor: pointer; transition: background .15s ease; }
+.gtable tbody tr:hover { background: #fbf7f0; }
+.gtable tbody tr:last-child td, .gtable tbody tr:last-child th { border-bottom: 0; }
+.tperson { display: flex; align-items: center; gap: 10px; min-width: 220px; position: sticky; left: 0; background: inherit; }
+.gtable tbody tr { background: var(--white); }
+.tperson .avatar { width: 32px; height: 32px; font-size: 0.7rem; }
+.tperson b { font-weight: 800; }
+.tperson small { display: block; font-size: 0.72rem; color: var(--rose); font-weight: 700; }
+.tplus { color: var(--ink-soft); font-weight: 800; margin-left: 6px; }
+.trow--ghost { cursor: default !important; }
+.trow--ghost .tperson b { color: var(--rose); }
+.tev { text-align: center !important; width: 34px; }
+.tcheck { color: var(--green); display: inline-grid; }
+.tno { color: #c3ccd4; font-weight: 800; }
+.tok { color: var(--green); font-weight: 800; }
+.tmuted { color: var(--ink-soft); font-weight: 600; }
+.tnum { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tlink { border: 0; background: none; padding: 0; font: inherit; font-weight: 800; color: var(--blue); text-decoration: underline; cursor: pointer; }
+.gtable .tag { margin-left: 4px; }
+.gtable tr.is-wait { filter: grayscale(0.5); opacity: 0.75; }
+#view-seg button[aria-pressed="true"] { background: var(--rose); }
 .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 0.8rem; color: var(--ink-soft); font-weight: 700; align-items: center; }
 .legend .ev { width: 20px; height: 20px; font-size: 0.6rem; }
 .legend span { display: inline-flex; gap: 6px; align-items: center; }
@@ -347,6 +374,10 @@ svg text { font-family: var(--font-body); }
       <div class="toolbar">
         <div class="toolbar__row">
           <input class="search" id="q" type="search" placeholder="Rechercher un prénom, un nom, une bande…" aria-label="Rechercher">
+          <div class="seg" id="view-seg" role="group" aria-label="Affichage">
+            <button data-view="cards" aria-pressed="true">Cartes</button>
+            <button data-view="table" aria-pressed="false">Tableau</button>
+          </div>
           <div class="seg" id="side-seg" role="group" aria-label="Côté">
             <button data-side="" aria-pressed="true">Tous</button>
             <button data-side="Arthur" aria-pressed="false">Côté Arthur</button>
@@ -655,9 +686,48 @@ function ghostCard(g) {
   </article>`;
 }
 
+/* ---------- Vue tableau ---------- */
+const COLS = [
+  { k: "nom", l: "Invité" }, { k: "cote", l: "Côté" }, { k: "lien", l: "Lien" }, { k: "sub", l: "Bande, foyer" },
+  ...EVENTS.map(e => ({ k: "ev:" + e.k, l: e.s, title: e.l, ev: true })),
+  { k: "p1", l: "+1" }, { k: "rep", l: "Réponse" }, { k: "age", l: "Âge", opt: "ages" },
+];
+const cols = () => COLS.filter(c => !c.opt || state[c.opt]); // l'âge suit la case « Afficher les âges »
+const sortVal = (g, k) => k === "nom" ? `${g.nom} ${g.prenom}` : k === "cote" ? g.cote : k === "lien" ? (ROLE[g.id] || g.lien) : k === "sub" ? (sub(g) || "")
+  : k.startsWith("ev:") ? (g.ev[k.slice(3)] ? 0 : 1) : k === "p1" ? (PLUS[g.id] ? 0 : openP1(g) ? 1 : 2) : k === "rep" ? (g.valide ? 0 : 1)
+  : k === "age" ? (() => { const a = ageOf(g); return a === null ? 999 : Array.isArray(a) ? a[0] : a; })() : "";
+function sortRows(arr) {
+  const { key, dir } = state.sort; if (!key || state.view !== "table") return arr;
+  return [...arr].sort((a, b) => { const x = sortVal(a, key), y = sortVal(b, key); return (x < y ? -1 : x > y ? 1 : 0) * dir || a.nom.localeCompare(b.nom); });
+}
+const yes = `<span class="tcheck" title="Invité">${checkIcon}</span>`, no = `<span class="tno" aria-label="Non">·</span>`;
+function row(g, host) {
+  const p1 = PLUS[g.id] ? `<button class="tlink" data-id="${PLUS[g.id].id}">${PLUS[g.id].prenom}</button>` : openP1(g) ? `<span class="tmuted">possible</span>` : "";
+  return `<tr class="${g.valide ? "" : "is-wait"}${host ? " trow--plus" : ""}" data-id="${g.id}" tabindex="0">
+    <th scope="row" class="tperson">${host ? `<span class="tplus" aria-hidden="true">↳</span>` : ""}${avatar(g)}<span><b>${g.prenom}</b> ${g.nom}${host ? `<small>+1 de ${host.prenom}</small>` : ""}</span></th>
+    <td>${g.cote ? `<span class="tag tag--side-${g.cote}">${g.cote}</span>` : ""}</td>
+    <td>${ROLE[g.id] || (g.lien && g.lien !== "Autre" ? LIEN_LABEL[g.lien] : "")}${(EXTRA[g.id] || []).filter(x => /^Témoin/.test(x) || /(d'Arthur|de Mathilde)$/.test(x)).map(x => `<span class="tag tag--special">${x}</span>`).join("")}</td>
+    <td>${ROLE[g.id] ? "" : (sub(g) || "")}</td>
+    ${EVENTS.map(e => `<td class="tev">${g.ev[e.k] ? yes : no}</td>`).join("")}
+    <td>${p1}</td>
+    <td>${g.valide ? `<span class="tok">Validé</span>` : `<span class="tmuted">En attente</span>`}</td>
+    ${state.ages ? `<td class="tnum">${ageOf(g) === null ? `<span class="tmuted">?</span>` : ageTxt(g)}</td>` : ""}
+  </tr>`;
+}
+function ghostRow(g) {
+  return `<tr class="trow--plus trow--ghost${g.valide ? "" : " is-wait"}">
+    <th scope="row" class="tperson"><span class="tplus" aria-hidden="true">↳</span><span class="avatar avatar--ghost">+1</span><span><b>Accompagnant</b> à confirmer<small>+1 de ${g.prenom}</small></span></th>
+    <td></td><td></td><td></td>${EVENTS.map(e => `<td class="tev">${g.ev[e.k] ? yes : no}</td>`).join("")}<td></td><td></td>${state.ages ? "<td></td>" : ""}
+  </tr>`;
+}
+const tableWrap = rows => `<div class="tablewrap"><table class="gtable">
+  <thead><tr>${cols().map(c => `<th scope="col" data-sort="${c.k}"${c.title ? ` title="${c.title}"` : ""} class="${c.ev ? "tev" : ""}${state.sort.key === c.k ? " is-sorted" : ""}" aria-sort="${state.sort.key === c.k ? (state.sort.dir > 0 ? "ascending" : "descending") : "none"}">${c.l}${state.sort.key === c.k ? (state.sort.dir > 0 ? " ▲" : " ▼") : ""}</th>`).join("")}</tr></thead>
+  <tbody>${rows}</tbody></table></div>`;
+
 /* ---------- Trombinoscope ---------- */
-const state = { q: "", side: "", liens: new Set(), evs: new Set(), groupby: "lien", p1: true, ages: false, rep: "" };
-try { const s = JSON.parse(localStorage.getItem("trombi-state") || "{}"); if (s.groupby) state.groupby = s.groupby; } catch (e) {}
+const state = { q: "", side: "", liens: new Set(), evs: new Set(), groupby: "lien", p1: true, ages: false, rep: "", view: "cards", sort: { key: "", dir: 1 } };
+try { const s = JSON.parse(localStorage.getItem("trombi-state") || "{}"); if (s.groupby) state.groupby = s.groupby; if (s.view) state.view = s.view; } catch (e) {}
+const saveState = () => { try { localStorage.setItem("trombi-state", JSON.stringify({ groupby: state.groupby, view: state.view })); } catch (err) {} };
 
 function buildFilters() {
   document.getElementById("lien-chips").innerHTML = LIENS.map(l => `<button class="chipbtn" data-lien="${l}" aria-pressed="false">${LIEN_LABEL[l]}</button>`).join("");
@@ -692,14 +762,15 @@ function renderTrombi() {
   const label = k => state.groupby === "lien" ? LIEN_LABEL[k] : state.groupby === "cote" ? (k ? "Côté " + k : "Côté à préciser") : (k || "À compléter");
   let p1count = 0;
   const html = keys.map(k => {
-    const items = groups.get(k).map(g => {
-      let h = card(g);
-      if (PLUS[g.id] && all.includes(PLUS[g.id])) h += card(PLUS[g.id]);
-      else if (state.p1 && openP1(g)) { h += ghostCard(g); p1count++; }
+    const asTable = state.view === "table";
+    const items = sortRows(groups.get(k)).map(g => {
+      let h = asTable ? row(g) : card(g);
+      if (PLUS[g.id] && all.includes(PLUS[g.id])) h += asTable ? row(PLUS[g.id], g) : card(PLUS[g.id]);
+      else if (state.p1 && openP1(g)) { h += asTable ? ghostRow(g) : ghostCard(g); p1count++; }
       return h;
     }).join("");
     const n = groups.get(k).reduce((a, g) => a + 1 + (PLUS[g.id] && all.includes(PLUS[g.id]) ? 1 : (state.p1 && openP1(g) ? 1 : 0)), 0);
-    return `<section class="group"><div class="group__head"><h2>${label(k)}</h2><span>${n} invité${n > 1 ? "s" : ""}</span></div><div class="grid">${items}</div></section>`;
+    return `<section class="group"><div class="group__head"><h2>${label(k)}</h2><span>${n} invité${n > 1 ? "s" : ""}</span></div>${state.view === "table" ? tableWrap(items) : `<div class="grid">${items}</div>`}</section>`;
   }).join("");
   document.getElementById("trombi").innerHTML = html || `<div class="note"><span>Aucun invité ne correspond à ces filtres.</span></div>`;
   // même base que les chiffres du haut : +1 nommés compris ; les mariés ne sont pas dans la grille
@@ -726,7 +797,15 @@ function wireTrombi() {
     const on = b.getAttribute("aria-pressed") !== "true"; b.setAttribute("aria-pressed", on);
     on ? state.evs.add(b.dataset.ev) : state.evs.delete(b.dataset.ev); renderTrombi();
   });
-  document.getElementById("groupby").addEventListener("change", e => { state.groupby = e.target.value; try { localStorage.setItem("trombi-state", JSON.stringify({ groupby: state.groupby })); } catch (err) {} renderTrombi(); });
+  document.getElementById("groupby").addEventListener("change", e => { state.groupby = e.target.value; saveState(); renderTrombi(); });
+  const viewSeg = document.getElementById("view-seg");
+  const syncView = () => viewSeg.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x.dataset.view === state.view));
+  syncView();
+  viewSeg.addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; state.view = b.dataset.view; syncView(); saveState(); renderTrombi(); });
+  document.getElementById("trombi").addEventListener("click", e => {
+    const th = e.target.closest("th[data-sort]"); if (!th) return;
+    state.sort = { key: th.dataset.sort, dir: state.sort.key === th.dataset.sort ? -state.sort.dir : 1 }; renderTrombi();
+  });
   document.getElementById("show-p1").addEventListener("change", e => { state.p1 = e.target.checked; renderTrombi(); });
   document.getElementById("show-age").addEventListener("change", e => { state.ages = e.target.checked; renderTrombi(); });
   document.getElementById("reponse").addEventListener("change", e => { state.rep = e.target.value; renderTrombi(); });
