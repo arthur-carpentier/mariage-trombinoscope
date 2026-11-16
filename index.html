@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Trombinoscope Arthur &amp; Mathilde</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@500;700;800&family=Mulish:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* Layout : bandeau rosé du site de liste, onglets en pilule, contenu sur fond crème washi. Charte reprise du site mariage-arthur-mathilde (thème clair unique, choisi). */
+:root {
+  color-scheme: light;
+  --white: #FFFFFF;
+  --cream: #FBF4E9;
+  --rose: #B05078;
+  --rose-light: #F6D5E0;
+  --green: #4E7A60;
+  --green-light: #DCEBDF;
+  --blue: #3A6E8C;
+  --blue-light: #D6E7F1;
+  --ink: #34526A;
+  --ink-soft: #5d7488;
+  --line: #e6dccb;
+  --radius: 18px;
+  --shadow: 0 10px 30px rgba(52, 82, 106, 0.12);
+  --shadow-hover: 0 16px 40px rgba(52, 82, 106, 0.2);
+  --font-display: "Funnel Display", "Mulish", system-ui, sans-serif;
+  --font-body: "Mulish", system-ui, -apple-system, sans-serif;
+  --side-arthur: var(--blue);
+  --side-mathilde: var(--rose);
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { background: var(--cream); color: var(--ink); }
+body {
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.55;
+  background:
+    radial-gradient(circle at 10% 12%, rgba(176, 80, 120, 0.10), transparent 36%),
+    radial-gradient(circle at 92% 18%, rgba(58, 110, 140, 0.10), transparent 38%),
+    radial-gradient(circle at 80% 90%, rgba(78, 122, 96, 0.10), transparent 40%),
+    var(--cream);
+  background-attachment: fixed;
+}
+h1, h2, h3 { font-family: var(--font-display); color: var(--blue); margin: 0; line-height: 1.15; text-wrap: balance; }
+button { font-family: inherit; }
+:focus-visible { outline: 3px solid var(--rose); outline-offset: 2px; }
+
+.wrap { max-width: 1180px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+/* ---------- Bandeau ---------- */
+.hero {
+  background:
+    radial-gradient(ellipse 120% 90% at 50% 0%, var(--rose-light) 0%, transparent 62%),
+    linear-gradient(165deg, rgba(214, 231, 241, 0.75) 0%, rgba(246, 213, 224, 0.5) 100%);
+  border-bottom: 1px solid var(--rose-light);
+}
+.hero .wrap { padding-block: 28px 18px; display: grid; gap: 18px; }
+.hero__top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; }
+.hero__kicker { text-transform: uppercase; letter-spacing: 0.18em; font-weight: 800; font-size: 0.72rem; color: var(--rose); margin: 0 0 4px; }
+.hero h1 { font-size: clamp(1.8rem, 5vw, 2.6rem); font-weight: 800; }
+.couple { display: flex; align-items: center; gap: 10px; }
+.couple .avatar { width: 52px; height: 52px; font-size: 1.05rem; box-shadow: 0 0 0 3px var(--white); }
+.couple__heart { color: var(--rose); font-weight: 800; font-family: var(--font-display); font-size: 1.4rem; }
+
+.stats { display: flex; flex-wrap: wrap; gap: 10px; }
+.stat {
+  background: var(--white); border: 1px solid var(--blue-light); border-radius: 14px;
+  padding: 8px 14px; min-width: 120px; display: grid; gap: 0;
+}
+.stat__n { font-family: var(--font-display); font-weight: 800; font-size: 1.45rem; color: var(--blue); font-variant-numeric: tabular-nums; line-height: 1.1; }
+.stat__l { font-size: 0.78rem; font-weight: 700; color: var(--ink-soft); }
+.stat__p { font-size: 0.72rem; color: var(--rose); font-weight: 700; }
+
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+.tab {
+  border: 2px solid var(--blue-light); background: var(--white); color: var(--ink);
+  padding: 8px 18px; border-radius: 999px; font-weight: 800; font-size: 0.92rem; cursor: pointer;
+  transition: background .18s ease;
+}
+.tab:hover { background: var(--blue-light); }
+.tab[aria-selected="true"] { background: var(--blue); border-color: var(--blue); color: var(--white); }
+
+main .wrap { padding-block: 24px 64px; }
+.view[hidden] { display: none !important; }
+
+.note {
+  display: flex; gap: 10px; align-items: flex-start;
+  background: var(--white); border: 1px dashed var(--rose); border-radius: 14px;
+  padding: 10px 14px; font-size: 0.86rem; margin-bottom: 18px;
+}
+.note b { color: var(--rose); white-space: nowrap; }
+
+/* ---------- Filtres ---------- */
+.toolbar { display: grid; gap: 12px; margin-bottom: 22px; }
+.toolbar__row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.search {
+  flex: 1 1 240px; min-width: 0; border: 2px solid var(--blue-light); background: var(--white);
+  border-radius: 999px; padding: 9px 16px; font: inherit; color: var(--ink);
+}
+.seg { display: inline-flex; background: var(--white); border: 2px solid var(--blue-light); border-radius: 999px; padding: 3px; flex-wrap: wrap; }
+.seg button { border: 0; background: transparent; border-radius: 999px; padding: 6px 12px; font-weight: 700; font-size: 0.85rem; color: var(--ink); cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--blue); color: var(--white); }
+.seg button[data-side="Arthur"][aria-pressed="true"] { background: var(--side-arthur); }
+.seg button[data-side="Mathilde"][aria-pressed="true"] { background: var(--side-mathilde); }
+.lbl { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.12em; font-weight: 800; color: var(--ink-soft); }
+.chipbtn {
+  border: 2px solid var(--line); background: var(--white); color: var(--ink);
+  padding: 5px 12px; border-radius: 999px; font-weight: 700; font-size: 0.82rem; cursor: pointer;
+}
+.chipbtn[aria-pressed="true"] { border-color: var(--green); background: var(--green-light); color: #2f5240; }
+.chipbtn[data-kind="event"][aria-pressed="true"] { border-color: var(--blue); background: var(--blue-light); color: #24506a; }
+.toggle { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 0.86rem; cursor: pointer; }
+.toggle input { accent-color: var(--rose); width: 18px; height: 18px; }
+select { font: inherit; font-weight: 700; color: var(--ink); background: var(--white); border: 2px solid var(--blue-light); border-radius: 999px; padding: 6px 12px; }
+.count { font-size: 0.86rem; color: var(--ink-soft); font-weight: 700; }
+
+/* ---------- Grille ---------- */
+.group { margin-bottom: 30px; }
+.group__head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px; border-bottom: 1px solid var(--line); padding-bottom: 6px; }
+.group__head h2 { font-size: 1.25rem; }
+.group__head span { color: var(--ink-soft); font-weight: 700; font-size: 0.85rem; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(176px, 1fr)); gap: 14px; }
+
+.card {
+  position: relative; background: var(--white); border: 1px solid var(--blue-light); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 18px 12px 12px; display: grid; justify-items: center; gap: 6px; text-align: center;
+  cursor: pointer; transition: transform .18s ease, box-shadow .18s ease; min-width: 0;
+}
+.card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
+.card[data-side="Arthur"] { border-top: 4px solid var(--side-arthur); }
+.card[data-side="Mathilde"] { border-top: 4px solid var(--side-mathilde); }
+.card[data-side=""] { border-top: 4px dashed var(--ink-soft); }
+.card__name { font-weight: 800; font-size: 1rem; line-height: 1.2; color: var(--ink); }
+.card__nom { display: block; font-size: 0.74rem; letter-spacing: 0.08em; font-weight: 700; color: var(--ink-soft); }
+.card__age { font-size: 0.78rem; font-weight: 800; color: var(--green); font-variant-numeric: tabular-nums; }
+.card__age--todo { color: #a9b9c6; font-weight: 700; }
+.card__tags { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; }
+/* pas encore validé : carte grisée */
+#tree .tree-node, .lnode, .p1pill { transition: opacity 0.6s ease, filter 0.6s ease, transform 0.6s ease; }
+.is-out { opacity: 0.1 !important; filter: grayscale(1) !important; }
+.lnode.is-out { transform: scale(0.85); }
+/* filtre de l'arbre : pilule flottante, collée en haut au défilement */
+.arbre-filter {
+  position: sticky; top: calc(env(safe-area-inset-top, 0px) + 10px); z-index: 5;
+  width: fit-content; max-width: 100%; margin: 0 auto 18px;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 12px;
+  background: var(--white); border: 1px solid var(--blue-light); border-radius: 999px;
+  padding: 6px 8px 6px 18px; box-shadow: var(--shadow);
+}
+.arbre-filter__lbl { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.14em; font-weight: 800; color: var(--rose); }
+.arbre-filter__seg { display: flex; flex-wrap: wrap; gap: 4px; }
+.arbre-filter__seg button {
+  border: 0; background: var(--cream); color: var(--ink); border-radius: 999px; padding: 7px 14px;
+  font: inherit; font-weight: 700; font-size: 0.86rem; cursor: pointer; transition: background .2s ease, color .2s ease;
+}
+.arbre-filter__seg button:hover { background: var(--blue-light); }
+.arbre-filter__seg button[aria-pressed="true"] { background: var(--blue); color: var(--white); }
+.arbre-filter__count { background: var(--rose-light); color: #8a3a5c; font-weight: 800; font-size: 0.8rem; border-radius: 999px; padding: 6px 12px; font-variant-numeric: tabular-nums; }
+.arbre-filter__count button { border: 0; background: none; color: inherit; font: inherit; text-decoration: underline; cursor: pointer; padding: 0 0 0 6px; }
+@media (max-width: 640px) { .arbre-filter { border-radius: 20px; padding: 10px; } }
+@media (prefers-reduced-motion: reduce) { #tree .tree-node, .lnode, .p1pill { transition: none; } }
+.card--wait, .is-wait { filter: grayscale(0.5); opacity: 0.75; }
+.lnode.is-wait:hover { opacity: 0.95; }
+.card--wait:hover, .card--wait:focus-visible { opacity: 0.95; }
+.card__ok { position: absolute; top: 10px; left: 10px; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: var(--green); color: var(--white); }
+.card__ok svg { width: 13px; height: 13px; }
+.ok-pill { display: inline-flex; align-items: center; gap: 6px; font-weight: 800; font-size: .9rem; color: var(--green); }
+.ok-pill--wait { color: var(--ink-soft); }
+.card__plus1 {
+  position: absolute; top: 10px; right: 10px; font-size: 0.7rem; font-weight: 800; color: var(--rose);
+  background: var(--rose-light); border-radius: 999px; padding: 1px 7px;
+}
+
+.avatar {
+  width: 76px; height: 76px; border-radius: 50%; display: grid; place-items: center;
+  font-family: var(--font-display); font-weight: 800; font-size: 1.5rem; color: var(--white);
+  background: var(--ink-soft); flex: none; letter-spacing: 0.02em;
+}
+.avatar[data-side="Arthur"] { background: linear-gradient(145deg, #4c84a4, var(--blue)); }
+.avatar[data-side="Mathilde"] { background: linear-gradient(145deg, #c46a90, var(--rose)); }
+.avatar--photo { background-size: cover; background-position: center; color: transparent; }
+.avatar--ghost { background: var(--white) !important; border: 2px dashed var(--rose); color: var(--rose); }
+
+.tag { font-size: 0.7rem; font-weight: 800; border-radius: 999px; padding: 2px 8px; white-space: nowrap; }
+.tag--lien { background: var(--green-light); color: #2f5240; }
+.tag--groupe { background: var(--blue-light); color: #24506a; }
+.tag--side-Arthur { background: var(--blue); color: var(--white); }
+.tag--side-Mathilde { background: var(--rose); color: var(--white); }
+.tag--todo { background: #f4e3c9; color: #7a4f12; }
+.tag--special { background: var(--white); color: #3d6650; border: 1.5px solid var(--green); }
+
+.events { display: flex; gap: 4px; margin-top: 2px; }
+.ev {
+  width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 0.66rem; font-weight: 800; border: 1.5px solid var(--blue-light); color: #a9b9c6; background: var(--white);
+}
+.ev.on { background: var(--green); border-color: var(--green); color: var(--white); }
+
+/* carte +1 fantôme, reliée à son invité */
+.pair { display: contents; }
+.card--ghost { border: 2px dashed var(--rose-light); box-shadow: none; background: rgba(255,255,255,0.6); cursor: default; }
+.card--ghost:hover { transform: none; box-shadow: none; }
+.card--ghost .card__name { color: var(--rose); }
+.link-hint { font-size: 0.74rem; font-weight: 700; color: var(--ink-soft); display: flex; align-items: center; gap: 4px; }
+.link-hint svg { width: 14px; height: 14px; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 0.8rem; color: var(--ink-soft); font-weight: 700; align-items: center; }
+.legend .ev { width: 20px; height: 20px; font-size: 0.6rem; }
+.legend span { display: inline-flex; gap: 6px; align-items: center; }
+
+/* ---------- Fiche ---------- */
+.drawer-bg { position: fixed; inset: 0; background: rgba(52, 82, 106, 0.28); z-index: 40; }
+.drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; width: min(420px, 100%); background: var(--white); z-index: 41;
+  box-shadow: -10px 0 40px rgba(52, 82, 106, 0.2); overflow-y: auto;
+  padding: calc(24px + env(safe-area-inset-top, 0px)) max(22px, env(safe-area-inset-right, 0px)) calc(24px + env(safe-area-inset-bottom, 0px)) 22px;
+  display: grid; align-content: start; gap: 18px;
+}
+.drawer__close { justify-self: end; border: 0; background: var(--cream); border-radius: 999px; padding: 6px 14px; font-weight: 800; cursor: pointer; color: var(--ink); }
+.drawer__id { display: flex; gap: 16px; align-items: center; }
+.drawer__id .avatar { width: 96px; height: 96px; font-size: 1.9rem; }
+.drawer h2 { font-size: 1.5rem; }
+.drawer h3 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--ink-soft); font-family: var(--font-body); font-weight: 800; margin-bottom: 8px; }
+.evlist { display: grid; gap: 6px; }
+.evlist div { display: flex; justify-content: space-between; border-bottom: 1px solid var(--cream); padding: 4px 0; font-weight: 700; }
+.yes { color: var(--green); } .no { color: #a9b9c6; }
+.mini { display: flex; flex-wrap: wrap; gap: 6px; }
+.mini button { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--blue-light); background: var(--white); border-radius: 999px; padding: 3px 10px 3px 3px; font-weight: 700; font-size: 0.8rem; cursor: pointer; color: var(--ink); }
+.mini .avatar { width: 26px; height: 26px; font-size: 0.62rem; }
+.photo-drop { border: 2px dashed var(--blue-light); border-radius: 14px; padding: 12px; font-size: 0.82rem; color: var(--ink-soft); text-align: center; }
+
+/* ---------- Arbre ---------- */
+.panel { background: var(--white); border: 1px solid var(--blue-light); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; margin-bottom: 24px; }
+.panel__head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 12px; }
+.panel__head h2 { font-size: 1.35rem; }
+.panel__head p { margin: 0; color: var(--ink-soft); font-size: 0.88rem; max-width: 60ch; }
+.scroll-x { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+svg text { font-family: var(--font-body); }
+.tree-node { cursor: pointer; }
+.tree-node:hover circle { stroke-width: 4; }
+.clans { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 8px; }
+.clan-col h3 { font-size: 1rem; margin-bottom: 10px; }
+.clan-col[data-side="Arthur"] h3 { color: var(--side-arthur); }
+.clan-col[data-side="Mathilde"] h3 { color: var(--side-mathilde); }
+.clan { border: 1px solid var(--line); border-radius: 14px; padding: 10px 12px; margin-bottom: 10px; background: var(--cream); }
+.clan__name { font-weight: 800; letter-spacing: 0.06em; font-size: 0.85rem; display: flex; justify-content: space-between; gap: 8px; }
+.clan__name em { font-style: normal; color: var(--ink-soft); font-weight: 700; letter-spacing: 0; }
+.clan .mini { margin-top: 6px; }
+@media (max-width: 720px) { .clans { grid-template-columns: 1fr; } }
+
+.loose { display: grid; gap: 18px; }
+.entourage { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 20px; border-top: 2px dotted var(--line); padding-top: 18px; }
+.entourage__col { min-width: 0; }
+.entourage__col h3 { font-size: 1rem; margin-bottom: 12px; color: var(--ink-soft); }
+.entourage__col[data-side="Arthur"] h3 { color: var(--side-arthur); }
+.entourage__col[data-side="Mathilde"] h3 { color: var(--side-mathilde); }
+@media (max-width: 760px) { .entourage { grid-template-columns: 1fr; } }
+.loose__cat h4 { margin: 0 0 10px; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--ink-soft); }
+.loose__cat h4 span { background: var(--cream); border-radius: 999px; padding: 1px 8px; margin-left: 4px; }
+.loose__grps { display: flex; flex-wrap: wrap; gap: 12px; }
+.loose__grp { border: 1.5px dashed var(--line); border-radius: 14px; padding: 8px 10px 6px; min-width: 0; }
+.loose__name { font-weight: 800; font-size: 0.78rem; color: var(--blue); margin-bottom: 4px; }
+.loose__people { display: flex; flex-wrap: wrap; gap: 2px; }
+.lnode { display: grid; justify-items: center; width: 84px; border: 0; background: none; padding: 2px; cursor: pointer; color: var(--ink); text-align: center; border-radius: 10px; }
+.lnode:hover { background: var(--cream); }
+.lwrap { position: relative; display: inline-block; margin-bottom: 4px; }
+.p1pill { position: absolute; right: -9px; bottom: 0; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-family: var(--font-display); font-size: 0.58rem; font-weight: 800; color: var(--white); background: var(--rose); border: 2px solid var(--white); }
+.p1pill[data-side="Arthur"] { background: var(--blue); }
+.p1pill--open { background: var(--white); color: var(--rose); border: 1.5px dashed var(--rose); }
+.lnode--temoin { background: var(--rose-light); border-radius: 14px; padding: 6px 2px 8px; }
+.lnode--temoin[data-of="Arthur"] { background: var(--blue-light); }
+.lnode--temoin .avatar { box-shadow: 0 0 0 3px var(--white), 0 0 0 5px var(--rose); width: 48px; height: 48px; font-size: 0.9rem; }
+.lnode--temoin[data-of="Arthur"] .avatar { box-shadow: 0 0 0 3px var(--white), 0 0 0 5px var(--blue); }
+.temoin-badge { margin-top: 4px; font-size: 0.62rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: var(--white); background: var(--rose); border-radius: 999px; padding: 1px 8px; }
+.lnode--temoin[data-of="Arthur"] .temoin-badge { background: var(--blue); }
+.lnode .avatar { width: 40px; height: 40px; font-size: 0.8rem; margin-bottom: 3px; }
+.lnode b { font-size: 0.76rem; line-height: 1.2; }
+.lnode small { font-size: 0.6rem; letter-spacing: 0.04em; color: var(--ink-soft); font-weight: 700; overflow-wrap: anywhere; }
+.radial-wrap { display: grid; place-items: center; }
+.radial-legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 0.8rem; font-weight: 700; color: var(--ink-soft); }
+.dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; vertical-align: -1px; margin-right: 6px; }
+
+/* ---------- Plan de table ---------- */
+.tables { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 20px; align-items: start; }
+@media (max-width: 860px) { .tables { grid-template-columns: 1fr; } }
+.floor {
+  min-height: 520px; border-radius: var(--radius); border: 2px dashed var(--blue-light);
+  background: repeating-linear-gradient(0deg, transparent 0 39px, rgba(214,231,241,0.45) 39px 40px), repeating-linear-gradient(90deg, transparent 0 39px, rgba(214,231,241,0.45) 39px 40px), var(--white);
+  display: grid; place-items: center; padding: 24px; position: relative;
+}
+.floor__empty { text-align: center; display: grid; justify-items: center; gap: 10px; max-width: 42ch; }
+.floor__empty h2 { font-size: 1.4rem; }
+.floor__empty p { margin: 0; color: var(--ink-soft); }
+.btn { border: 0; border-radius: 999px; padding: 10px 20px; font-weight: 800; cursor: pointer; font-size: 0.92rem; }
+.btn--primary { background: var(--rose); color: var(--white); }
+.btn--ghost { background: transparent; border: 2px solid var(--ink); color: var(--ink); }
+.btn[disabled] { opacity: 0.55; cursor: not-allowed; }
+.ghost-tables { display: flex; flex-wrap: wrap; gap: 26px; justify-content: center; margin-top: 8px; }
+.side-list { background: var(--white); border: 1px solid var(--blue-light); border-radius: var(--radius); padding: 16px; max-height: 640px; overflow-y: auto; }
+.side-list h3 { font-size: 1.05rem; margin-bottom: 4px; }
+.side-list p { margin: 0 0 10px; font-size: 0.82rem; color: var(--ink-soft); }
+.side-list h4 { margin: 14px 0 6px; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--ink-soft); }
+.seatable { display: flex; align-items: center; gap: 8px; padding: 4px 6px; border-radius: 10px; font-weight: 700; font-size: 0.85rem; cursor: grab; }
+.seatable:hover { background: var(--cream); }
+.seatable .avatar { width: 28px; height: 28px; font-size: 0.65rem; }
+.seatable small { color: var(--rose); font-weight: 800; margin-left: auto; }
+
+.issues { background: var(--white); border: 1px solid #f0d9b4; border-radius: 14px; padding: 12px 16px; font-size: 0.86rem; margin-top: 24px; }
+.issues h3 { font-size: 0.95rem; color: #7a4f12; margin-bottom: 6px; }
+.issues ul { margin: 0; padding-left: 18px; }
+@media (prefers-reduced-motion: reduce) { .card, .tab { transition: none; } }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="hero__top">
+      <div>
+        <p class="hero__kicker">Mariage d'Arthur &amp; Mathilde</p>
+        <h1>Le trombinoscope du mariage</h1>
+      </div>
+      <div class="couple" aria-label="Arthur et Mathilde">
+        <span class="avatar" data-side="Arthur">AC</span>
+        <span class="couple__heart">&amp;</span>
+        <span class="avatar" data-side="Mathilde">MT</span>
+      </div>
+    </div>
+    <div class="stats" id="stats"></div>
+    <nav class="tabs" role="tablist" aria-label="Vues">
+      <button class="tab" role="tab" data-view="trombi" id="tab-trombi">Trombinoscope</button>
+      <button class="tab" role="tab" data-view="arbre" id="tab-arbre">Arbre et diagramme</button>
+      <button class="tab" role="tab" data-view="tables" id="tab-tables" hidden>Plan de table</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+
+    <!-- ================= TROMBINOSCOPE ================= -->
+    <section class="view" id="view-trombi">
+      <div class="toolbar">
+        <div class="toolbar__row">
+          <input class="search" id="q" type="search" placeholder="Rechercher un prénom, un nom, une bande…" aria-label="Rechercher">
+          <div class="seg" id="side-seg" role="group" aria-label="Côté">
+            <button data-side="" aria-pressed="true">Tous</button>
+            <button data-side="Arthur" aria-pressed="false">Côté Arthur</button>
+            <button data-side="Mathilde" aria-pressed="false">Côté Mathilde</button>
+          </div>
+        </div>
+        <div class="toolbar__row">
+          <span class="lbl">Lien</span>
+          <div class="toolbar__row" id="lien-chips"></div>
+        </div>
+        <div class="toolbar__row">
+          <span class="lbl">Invité à</span>
+          <div class="toolbar__row" id="ev-chips"></div>
+        </div>
+        <div class="toolbar__row" style="justify-content: space-between;">
+          <div class="toolbar__row">
+            <label class="lbl" for="groupby">Regrouper par</label>
+            <select id="groupby">
+              <option value="lien">Lien</option>
+              <option value="cote">Côté</option>
+              <option value="groupe">Bande / foyer</option>
+              <option value="none">Aucun regroupement</option>
+            </select>
+            <label class="toggle"><input type="checkbox" id="show-p1" checked> Afficher les +1 potentiels</label>
+            <label class="toggle"><input type="checkbox" id="show-age"> Afficher les âges</label>
+            <label class="lbl" for="reponse">Réponse</label>
+            <select id="reponse"><option value="">Toutes</option><option value="ok">Validé</option><option value="wait">En attente</option></select>
+          </div>
+          <span class="count" id="count"></span>
+        </div>
+      </div>
+      <div id="trombi"></div>
+    </section>
+
+    <!-- ================= ARBRE ================= -->
+    <section class="view" id="view-arbre" hidden>
+
+      <div class="arbre-filter" role="group" aria-label="Filtrer par invitation">
+        <span class="arbre-filter__lbl">Invité à</span>
+        <div class="arbre-filter__seg" id="arbre-ev"></div>
+        <span class="arbre-filter__count" id="arbre-count" hidden></span>
+      </div>
+
+      <div class="panel">
+        <div class="panel__head">
+          <h2>Arbre généalogique</h2>
+          <p>Famille d'Arthur à gauche (Carpentier puis Le Roc'h), famille de Mathilde à droite (Tauveron puis Viallon). Un clic sur une personne ouvre sa fiche.</p>
+        </div>
+        <div class="toolbar__row" style="margin-bottom: 10px;"><button class="chipbtn" id="tree-fit" aria-pressed="false">Vue d'ensemble</button><label class="toggle"><input type="checkbox" id="show-god" checked> Parrains et marraines</label></div>
+        <div class="scroll-x" id="tree-scroll"><svg id="tree" style="height: auto; display: block;" role="img" aria-label="Arbre généalogique d'Arthur et Mathilde"></svg></div>
+        <div class="entourage">
+          <div class="entourage__col" data-side="Arthur"><h3>Côté Arthur, hors famille</h3><div class="loose" id="loose-Arthur"></div></div>
+          <div class="entourage__col" data-side="Mathilde"><h3>Côté Mathilde, hors famille</h3><div class="loose" id="loose-Mathilde"></div></div>
+        </div>
+        <div class="entourage__col" id="none-col" style="margin-top: 18px;"><h3>Côté à préciser</h3><div class="loose" id="loose-none"></div></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel__head">
+          <h2>Diagramme de tous les invités</h2>
+          <p>Du couple vers chaque côté, puis par lien, puis par bande, foyer ou rôle familial.</p>
+        </div>
+        <div class="radial-legend">
+          <span><i class="dot" style="background: var(--blue)"></i>Côté Arthur</span>
+          <span><i class="dot" style="background: var(--rose)"></i>Côté Mathilde</span>
+          <span><i class="dot" style="background: var(--ink-soft)"></i>À préciser</span>
+          <span><i class="dot" style="background: var(--white); border: 1.5px solid var(--ink-soft)"></i>Accompagnant (+1), relié à son invité par un trait</span>
+          <span>« +1 » après un nom : +1 possible, pas encore connu</span>
+        </div>
+        <div class="scroll-x radial-wrap"><svg id="radial" style="min-width: 900px; width: 100%; max-width: 1180px; height: auto;" role="img" aria-label="Diagramme radial des invités"></svg></div>
+      </div>
+    </section>
+
+    <!-- ================= PLAN DE TABLE ================= -->
+    <section class="view" id="view-tables" hidden>
+      <div class="tables">
+        <div class="floor">
+          <div class="floor__empty">
+            <svg width="140" height="140" viewBox="0 0 140 140" aria-hidden="true">
+              <circle cx="70" cy="70" r="38" fill="#FBF4E9" stroke="#D6E7F1" stroke-width="3" stroke-dasharray="6 6"/>
+              <g fill="#FFFFFF" stroke="#F6D5E0" stroke-width="2.5">
+                <circle cx="70" cy="18" r="10"/><circle cx="107" cy="33" r="10"/><circle cx="122" cy="70" r="10"/><circle cx="107" cy="107" r="10"/>
+                <circle cx="70" cy="122" r="10"/><circle cx="33" cy="107" r="10"/><circle cx="18" cy="70" r="10"/><circle cx="33" cy="33" r="10"/>
+              </g>
+            </svg>
+            <h2>Pas encore de plan de table</h2>
+            <p id="tables-sub"></p>
+            <div class="toolbar__row" style="justify-content: center;">
+              <button class="btn btn--primary" disabled title="Disponible dans la vraie version">Ajouter une table</button>
+              <button class="btn btn--ghost" disabled title="Disponible dans la vraie version">Proposer un placement</button>
+            </div>
+          </div>
+        </div>
+        <aside class="side-list" aria-label="Invités à placer">
+          <h3>À placer</h3>
+          <p id="toplace-sub"></p>
+          <div id="toplace"></div>
+        </aside>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<div class="drawer-bg" id="drawer-bg" hidden></div>
+<aside class="drawer" id="drawer" hidden aria-modal="true" role="dialog" aria-labelledby="d-name"></aside>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="data/invites.js"></script>
+<script>
+const RAW = INVITES; // liste chargée depuis data/invites.js
+
+/* ---------- Données ---------- */
+const EVENTS = [
+  { k: "mairie", l: "Mairie", s: "M" },
+  { k: "eglise", l: "Église", s: "É" },
+  { k: "vin", l: "Vin d'honneur", s: "V" },
+  { k: "repas", l: "Repas", s: "R" },
+  { k: "brunch", l: "Brunch", s: "B" },
+];
+const LIENS = ["Famille proche", "Famille éloignée", "Amis", "Autre"];
+const LIEN_LABEL = { "Famille proche": "Famille proche", "Famille éloignée": "Famille éloignée", "Amis": "Amis", "Autre": "Autres", "": "À compléter" };
+
+const cap = s => s.toLowerCase().replace(/(^|[\s'-])(\p{L})/gu, (m, a, b) => a + b.toUpperCase());
+const guests = RAW.map(g => ({ ...g, nomAff: g.nom, todo: [] }));
+// corrections de la maquette
+guests.forEach(g => {
+  if (g.groupe === "Marié") { g.cote = "Arthur"; g.lien = "Mariés"; g.couple = true; }
+  if (g.groupe === "Mariée") { g.cote = "Mathilde"; g.lien = "Mariés"; g.couple = true; }
+  if (g.lien === "Travail") g.groupe = g.cote === "Arthur" ? "VOTREX" : (g.groupe || "Travail");
+  if (["Ami proche", "Copains", "Travail"].includes(g.lien)) g.lien = "Amis";
+  if (g.groupe === "Belges") g.lien = "Famille éloignée";
+  g.naissance = g.naissance || null; // date de naissance AAAA-MM-JJ, à renseigner
+  if (!g.cote && g.nom) g.todo.push("côté à préciser");
+  if (!g.nom) g.todo.push("nom à compléter");
+  if (!Object.values(g.ev).some(Boolean)) g.todo.push("aucun événement coché");
+});
+const byId = Object.fromEntries(guests.map(g => [g.id, g]));
+const people = guests.filter(g => !g.couple);
+const initials = g => ((g.prenom || "?").replace("?", "").trim()[0] || "?") + (g.nom ? g.nom[0] : "");
+const fullName = g => `${g.prenom.replace(" ?", "")} ${g.nom ? cap(g.nom) : ""}`.trim();
+
+/* +1 potentiels : fiche fantôme rattachée à l'invité */
+/* +1 renseignés : plusOneOf = id de la personne accompagnée */
+const PLUS = {}; people.forEach(g => { if (g.plusOneOf) PLUS[g.plusOneOf] = g; });
+// règle : un +1 hérite des invitations (et du côté, du lien, de la bande) de la personne qu'il accompagne
+// evOverride : exception propre au +1 (ex. ne vient pas au repas)
+people.forEach(g => { const h = g.plusOneOf && byId[g.plusOneOf]; if (h) Object.assign(g, { ev: { ...h.ev, ...(g.evOverride || {}) }, cote: h.cote, lien: h.lien, groupe: h.groupe }); });
+const openP1 = g => g.plus1 && !PLUS[g.id];
+const hostOf = g => g.plusOneOf ? byId[g.plusOneOf] : null;
+const plusOnes = people.filter(openP1).map(g => ({ id: "p" + g.id, of: g.id, ghost: true }));
+
+/* ---------- Parenté (donnée par Arthur) ---------- */
+const find = (nom, prenom) => guests.find(g => g.nom === nom && g.prenom === prenom);
+const FEM = "Valentine Françoise Alizée Bertille Armande Eloïse Coraline Marion Elise Fanchon Fabienne Eliza Joséphine Adèle Lomane Typhenn Coraly Perrine Sophie Lisa Meline Daphnée Diane Appoline Janik Virginie Murielle Sarah Romane Charlyne Frédérique Marie-Alice Marjolaine Victoire Solange Valérie Carine Carole Marie Alice Elodie Julie Amélie Anne-Marie Danièle Evelyne Mathilde Blandine Mia".split(" ");
+const UNSURE = [];
+const gw = (p, m, f) => UNSURE.includes(p) ? `${m}(e)` : FEM.includes(p) ? f : m;
+/* Un seul arbre. U(personne, { sp: conjoint, kids: [...], dash: enfants supposés, spDash: conjoint supposé, center: parents d'un marié,
+   kidsFrom: "p" si les enfants ne sont que de la personne, link: frère ou sœur déjà placé ailleurs dans l'arbre }) */
+const U = (p, o = {}) => ({ p, kids: [], ...o });
+const C_ = n => ["CARPENTIER", n], L_ = n => ["LEROC'H", n], T_ = n => ["TAUVERON", n], V_ = n => ["VIALLON", n];
+const TREE = [
+  { side: "Arthur", unit: U(["LESUEUR", "Evelyne"], { kids: [
+    U(C_("Thierry"), { kids: [U(C_("Lomane")), U(C_("Typhenn"))] }),
+    U(C_("Christophe"), { sp: C_("Sophie"), kids: [
+      U(C_("Guillaume"), { sp: C_("Blandine"), kids: [U(C_("Enzo")), U(C_("Mia"))] }),
+      U(C_("Coraly"), { sp: ["LEIDELKER", "Charlie"] }),
+      U(C_("Perrine")) ] }),
+    U(["HERRBACH", "Lisa"], { sp: ["HERRBACH", "Ludovic"], kids: ["Meline", "Daphnée", "Diane", "Appoline"].map(p => U(["HERRBACH", p])) }),
+    U(C_("Patrick"), { sp: C_("Janik"), center: true, kids: ["Elodie", "Julie", "Amélie", "Arthur"].map(p => U(C_(p))) }),
+  ] }) },
+  { side: "Arthur", unit: { label: "Fratrie Le Roc'h", link: C_("Janik"), kids: [
+    U(L_("Jean-Yves"), { sp: L_("Virginie"), kids: [U(L_("Sarah")), U(L_("Romane"))] }),
+    U(L_("Tristan"), { sp: L_("Murielle"), kids: [U(L_("Charlyne")), U(L_("Julien"))] }),
+  ] } },
+  { side: "Mathilde", unit: U(T_("Anne-Marie"), { kids: [
+    U(T_("Nicolas"), { sp: T_("Frédérique"), kids: ["Marjolaine", "Victoire", "Solange"].map(p => U(T_(p))) }),
+    U(T_("Matthias"), { sp: T_("Marie-Alice"), kids: [U(T_("Achille"))] }),
+    U(T_("Fabrice"), { sp: T_("Valérie"), center: true, kids: ["Mathilde", "Alice", "Raphaël"].map(p => U(T_(p))) }),
+  ] }) },
+  { side: "Mathilde", unit: U(V_("François"), { sp: ["CATHERINE", "Danièle"], kidsFrom: "p", link: T_("Valérie"), kids: [
+    U(["BENHYAYA", "Carine"], { sp: ["BENHYAYA", "Ahmed"], kids: ["Nassim", "Salim", "Naël"].map(p => U(["BENHYAYA", p])) }),
+    U(["LAVERDURE", "Carole"], { sp: ["LAVERDURE", "Michel"], kids: ["Hugo", "Mahé"].map(p => U(["LAVERDURE", p])) }),
+    U(V_("Fabrice"), { sp: V_("Marie") }),
+    U(V_("Florent"), { sp: V_("Françoise"), kids: [U(V_("Simon")), U(V_("Antonin")), U(V_("Elodie")), U(V_("Alizée")), U(["LYANT", "Bertille"])] }),
+  ] }) },
+  { side: "Mathilde", detached: "Famille belge", sub: "reliée par les parrainages", foyer: "Belges, Lemaitre et Vandermaes", extras: { row: 2, refs: [["LAMBERT", "Sébastien"], ["LAMBERT", "Nicolas"]] }, unit: U(["LEMAITRE", "André"], { sp: ["LEMAITRE", "Fabienne"], kids: [
+    U(["VANDERMAES", "Fanchon"], { sp: ["VANDERMAES", "Jérôme"], kids: ["Eliza", "Joséphine", "Adèle"].map(p => U(["VANDERMAES", p])) }),
+  ] }) },
+];
+/* liens de famille hors de l'arbre : visibles seulement dans les fiches */
+const FAMILLES_HORS_ARBRE = [
+  { parents: [["JEANTET", "Alexis"], ["JEANTET", "Valentine"]], enfants: [["JEANTET", "Anaé"]] },
+].map(f => ({ parents: f.parents.map(r => find(...r)).filter(Boolean), enfants: f.enfants.map(r => find(...r)).filter(Boolean) }));
+const ROLE = {}, CATG = {}, UNIT_FOYER = {}, IN_TREE = new Set();
+TREE.forEach(({ side, unit, detached, extras, foyer: dFoyer }) => {
+  if (extras) extras.refs.forEach(r => { const g = find(...r); if (g) IN_TREE.add(g.id); });
+  if (detached) { // branche pas encore rattachée au reste de l'arbre
+    const mark = (u, parent) => [u.p, u.sp].filter(Boolean).forEach(r => { const g = find(...r); if (!g) return; IN_TREE.add(g.id); if (dFoyer) UNIT_FOYER[g.id] = dFoyer; if (parent && r === u.p) ROLE[g.id] = `${gw(r[1], "Fils", "Fille")} ${/^[AEIOUYÉÈ]/i.test(parent.p[1]) ? "d'" : "de "}${parent.p[1]} et ${parent.sp[1]}${parent.dash ? " ?" : ""}`; });
+    const rec = (u, parent) => { mark(u, parent); u.kids.forEach(k => rec(k, u)); };
+    rec(unit, null); return;
+  }
+  const suf = side === "Arthur" ? "d'Arthur" : "de Mathilde";
+  const set = (ref, r, cat, foyer) => { const g = ref && find(...ref); if (!g) return; IN_TREE.add(g.id); if (g.couple) return; ROLE[g.id] = r; if (cat) CATG[g.id] = cat; if (foyer) UNIT_FOYER[g.id] = foyer; };
+  const walk = (u, d, parent, foyer) => {
+    const q = parent && parent.dash ? " ?" : "", pp = u.p && find(...u.p);
+    if (d === 0 && u.p) {
+      set(u.p, `${gw(u.p[1], "Grand-père", "Grand-mère")} ${suf}`, "Grands-parents");
+      if (u.sp) set(u.sp, u.kidsFrom === "p" ? `${gw(u.sp[1], "Mari", "Femme")} de ${u.p[1]}` : `${gw(u.sp[1], "Grand-père", "Grand-mère")} ${suf}`, "Grands-parents");
+    } else if (d === 1) {
+      foyer = [u.p[1], u.sp && u.sp[1]].filter(Boolean).join(" et ") + " " + cap(u.p[0]);
+      if (u.center) { set(u.p, `${gw(u.p[1], "Père", "Mère")} ${suf}`, "Parents"); set(u.sp, `${gw(u.sp[1], "Père", "Mère")} ${suf}`, "Parents"); foyer = null; }
+      else { set(u.p, `${gw(u.p[1], "Oncle", "Tante")} ${suf}`, null, foyer); if (u.sp) set(u.sp, `${gw(u.sp[1], "Oncle", "Tante")} ${suf} (alliance)${u.spDash ? " ?" : ""}`, null, foyer); }
+    } else if (d === 2) {
+      if (parent.center) set(u.p, `${gw(u.p[1], "Frère", "Sœur")} ${suf}`, "Frères et sœurs");
+      else set(u.p, `${gw(u.p[1], "Cousin", "Cousine")} ${suf}${q}`, null, foyer);
+      if (u.sp) set(u.sp, `${gw(u.sp[1], "Mari", "Femme")} de ${u.p[1]}`, null, foyer);
+    } else if (d === 3) {
+      set(u.p, `${gw(u.p[1], "Fils", "Fille")} de ${parent.p[1]}`, null, foyer);
+    }
+    u.kids.forEach(k => walk(k, d + 1, u, foyer));
+  };
+  walk(unit, 0, null, null);
+});
+
+/* foyers de la famille éloignée : branche de l'oncle ou de la tante, sinon nom de famille */
+people.forEach(g => {
+  if (g.lien !== "Famille éloignée") return;
+  g.foyer = UNIT_FOYER[g.id] || (g.groupe ? g.groupe + ", " : "") + cap(g.nom);
+});
+/* sous-catégorie affichée : rôle familial, foyer ou bande */
+/* parrainages et témoins */
+const GODLINKS = [
+  [["VANDERMAES", "Fanchon"], T_("Mathilde")], [T_("Mathilde"), ["VANDERMAES", "Eliza"]], [T_("Valérie"), ["VANDERMAES", "Fanchon"]],
+  [["LEMAITRE", "Fabienne"], T_("Valérie")], [["HERRBACH", "Lisa"], C_("Arthur")], [C_("Thierry"), C_("Arthur")], [["LAMBERT", "Sébastien"], ["VANDERMAES", "Eliza"]], [["LAMBERT", "Nicolas"], ["VANDERMAES", "Eliza"]],
+].map(([a, b]) => ({ from: find(...a), to: find(...b) })).filter(l => l.from && l.to);
+const TEMOINS = { Arthur: [["LESNARD", "Eliot"], ["JAOUEN", "Elise"]], Mathilde: [["VERDIER", "Armande"], ["GANNIER", "Eloïse"], ["AUVRAY", "Coraline"], ["BLANCHARD", "Marion"]] };
+const EXTRA = {}, TEMOIN_OF = {};
+const addX = (g, txt) => (EXTRA[g.id] = EXTRA[g.id] || []).push(txt);
+const deOf = g => /^[AEIOUYÉÈ]/i.test(g.prenom) ? `d'${g.prenom}` : `de ${g.prenom}`;
+GODLINKS.forEach(({ from, to }) => { addX(from, `${gw(from.prenom, "Parrain", "Marraine")} ${deOf(to)}`); addX(to, `${gw(to.prenom, "Filleul", "Filleule")} ${deOf(from)}`); });
+Object.entries(TEMOINS).forEach(([who, refs]) => refs.forEach(r => { const g = find(...r); if (g) { TEMOIN_OF[g.id] = who; addX(g, `Témoin ${who === "Arthur" ? "d'Arthur" : "de Mathilde"}`); } }));
+const sub = g => g.lien === "Famille proche" ? (CATG[g.id] || g.groupe || cap(g.nom)) : g.lien === "Famille éloignée" ? g.foyer : g.groupe;
+
+/* âge calculé à la date du jour */
+const TODAY = new Date();
+/* naissance au format AAAA-MM-JJ ; un X dans l'année (197X) donne une fourchette d'âge */
+const ageIn = (y, m, d) => { let a = TODAY.getFullYear() - y; if (TODAY.getMonth() + 1 < m || (TODAY.getMonth() + 1 === m && TODAY.getDate() < d)) a--; return a; };
+const ageOf = g => {
+  if (!g.naissance) return null;
+  const [y, m, d] = g.naissance.split("-");
+  if (y.includes("X")) { const y0 = +y.replace("X", "0"), y9 = +y.replace("X", "9"); return [ageIn(y9, +m, +d), ageIn(y0, +m, +d)]; }
+  return ageIn(+y, +m, +d);
+};
+const ageTxt = g => { const a = ageOf(g); return a === null ? "âge ?" : Array.isArray(a) ? `${a[0]} à ${a[1]} ans` : `${a} an${a > 1 ? "s" : ""}`; };
+const MOIS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
+const dateFr = s => { const [y, m, d] = s.split("-"); return `${+d === 1 ? "1er" : +d} ${MOIS[+m - 1]} ${y.replace("X", "?")}`; };
+
+/* ---------- Bandeau : compteurs ---------- */
+function renderStats() {
+  const total = guests.length;
+  const p1 = plusOnes.length;
+  const ok = guests.filter(g => g.valide).length;
+  const html = [`<div class="stat"><span class="stat__n">${total}</span><span class="stat__l">invités</span><span class="stat__p">+ ${p1} accompagnants possibles</span></div>`,
+    `<div class="stat"><span class="stat__n" style="color:var(--green)">${ok}</span><span class="stat__l">ont validé</span><span class="stat__p" style="color:var(--ink-soft)">${total - ok} en attente</span></div>`];
+  EVENTS.forEach(e => {
+    const n = guests.filter(g => g.ev[e.k]).length;
+    const pp = people.filter(g => g.ev[e.k] && openP1(g)).length;
+    html.push(`<div class="stat"><span class="stat__n">${n}</span><span class="stat__l">${e.l}</span><span class="stat__p">${pp ? "+ " + pp + " possibles" : "&nbsp;"}</span></div>`);
+  });
+  document.getElementById("stats").innerHTML = html.join("");
+}
+
+/* ---------- Composants ---------- */
+const avatar = (g, extra = "") => g.photo
+  ? `<span class="avatar avatar--photo ${extra}" data-side="${g.cote}" style="background-image:url('${g.photo}')">${initials(g)}</span>`
+  : `<span class="avatar ${extra}" data-side="${g.cote}" aria-hidden="true">${initials(g)}</span>`;
+const evDots = g => `<div class="events">${EVENTS.map(e => `<i class="ev ${g.ev[e.k] ? "on" : ""}" title="${e.l} : ${g.ev[e.k] ? "invité" : "non invité"}">${e.s}</i>`).join("")}</div>`;
+const tags = g => {
+  const t = [];
+  if (ROLE[g.id]) t.push(`<span class="tag tag--lien">${ROLE[g.id]}</span>`);
+  else if (g.lien && g.lien !== "Autre") t.push(`<span class="tag tag--lien">${LIEN_LABEL[g.lien] || g.lien}</span>`);
+  if (sub(g) && !g.couple && !ROLE[g.id]) t.push(`<span class="tag tag--groupe">${sub(g)}</span>`);
+  // sur les cartes : parrainages seulement s'ils concernent Arthur ou Mathilde (tous restent dans la fiche)
+  (EXTRA[g.id] || []).filter(x => !/^(Parrain|Marraine|Filleul|Filleule) /.test(x) || /(d'Arthur|de Mathilde)$/.test(x)).forEach(x => t.push(`<span class="tag tag--special">${x}</span>`));
+  return `<div class="card__tags">${t.join("")}</div>`;
+};
+const linkIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M10 14a4 4 0 0 0 5.6 0l3-3a4 4 0 0 0-5.6-5.6l-1 1"/><path d="M14 10a4 4 0 0 0-5.6 0l-3 3a4 4 0 0 0 5.6 5.6l1-1"/></svg>`;
+
+const checkIcon = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>`;
+function card(g) {
+  return `<article class="card${g.valide ? "" : " card--wait"}" data-side="${g.cote}" data-id="${g.id}" tabindex="0" aria-label="${fullName(g)}${g.valide ? ", a validé" : ", en attente de réponse"}"${g.valide ? "" : ` title="En attente de réponse"`}>
+    ${openP1(g) ? `<span class="card__plus1" title="Peut venir accompagné">+1</span>` : ""}
+    ${avatar(g)}
+    <div class="card__name">${g.prenom.replace(" ?", "") || "?"}<span class="card__nom">${g.nom || ""}</span></div>
+    ${state.ages ? `<span class="card__age${ageOf(g) === null ? " card__age--todo" : ""}" title="${g.naissance ? "Né(e) le " + dateFr(g.naissance) : "Date de naissance à renseigner"}">${ageTxt(g)}</span>` : ""}
+    ${tags(g)}
+    ${hostOf(g) ? `<span class="link-hint">${linkIcon} +1 de ${hostOf(g).prenom}</span>` : ""}
+  </article>`;
+}
+function ghostCard(g) {
+  return `<article class="card card--ghost${g.valide ? "" : " card--wait"}" data-side="${g.cote}" aria-label="Accompagnant possible de ${fullName(g)}">
+    <span class="avatar avatar--ghost">+1</span>
+    <div class="card__name">Accompagnant<span class="card__nom">à confirmer</span></div>
+    <span class="link-hint">${linkIcon} +1 de ${g.prenom}</span>
+  </article>`;
+}
+
+/* ---------- Trombinoscope ---------- */
+const state = { q: "", side: "", liens: new Set(), evs: new Set(), groupby: "lien", p1: true, ages: false, rep: "" };
+try { const s = JSON.parse(localStorage.getItem("trombi-state") || "{}"); if (s.groupby) state.groupby = s.groupby; } catch (e) {}
+
+function buildFilters() {
+  document.getElementById("lien-chips").innerHTML = LIENS.map(l => `<button class="chipbtn" data-lien="${l}" aria-pressed="false">${LIEN_LABEL[l]}</button>`).join("");
+  document.getElementById("ev-chips").innerHTML = EVENTS.map(e => `<button class="chipbtn" data-kind="event" data-ev="${e.k}" aria-pressed="false">${e.l}</button>`).join("");
+  document.getElementById("groupby").value = state.groupby;
+}
+function matches(g) {
+  if (state.side && g.cote !== state.side) return false;
+  if (state.rep && (state.rep === "ok") !== !!g.valide) return false;
+  if (state.liens.size && !state.liens.has(g.lien)) return false;
+  for (const e of state.evs) if (!g.ev[e]) return false;
+  if (state.q) {
+    const hay = `${g.prenom} ${g.nom} ${g.groupe} ${g.foyer || ""} ${g.lien} ${ROLE[g.id] || ""}`.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
+    if (!hay.includes(state.q)) return false;
+  }
+  return true;
+}
+function renderTrombi() {
+  const all = people.filter(matches);
+  const list = all.filter(g => !(hostOf(g) && all.includes(hostOf(g))));
+  const keyOf = g => state.groupby === "lien" ? (g.lien || "")
+    : state.groupby === "cote" ? (g.cote || "")
+    : state.groupby === "groupe" ? (sub(g) || "Sans bande")
+    : "Tous";
+  const order = state.groupby === "lien" ? [...LIENS, ""] : null;
+  const groups = new Map();
+  list.forEach(g => { const k = keyOf(g); if (!groups.has(k)) groups.set(k, []); groups.get(k).push(g); });
+  let keys = [...groups.keys()];
+  if (order) keys.sort((a, b) => order.indexOf(a) - order.indexOf(b));
+  else if (state.groupby === "cote") keys.sort((a, b) => (a || "zz").localeCompare(b || "zz"));
+  else if (state.groupby === "groupe") keys.sort((a, b) => groups.get(b).length - groups.get(a).length);
+  const label = k => state.groupby === "lien" ? LIEN_LABEL[k] : state.groupby === "cote" ? (k ? "Côté " + k : "Côté à préciser") : (k || "À compléter");
+  let p1count = 0;
+  const html = keys.map(k => {
+    const items = groups.get(k).map(g => {
+      let h = card(g);
+      if (PLUS[g.id] && all.includes(PLUS[g.id])) h += card(PLUS[g.id]);
+      else if (state.p1 && openP1(g)) { h += ghostCard(g); p1count++; }
+      return h;
+    }).join("");
+    const n = groups.get(k).reduce((a, g) => a + 1 + (PLUS[g.id] && all.includes(PLUS[g.id]) ? 1 : (state.p1 && openP1(g) ? 1 : 0)), 0);
+    return `<section class="group"><div class="group__head"><h2>${label(k)}</h2><span>${n} invité${n > 1 ? "s" : ""}</span></div><div class="grid">${items}</div></section>`;
+  }).join("");
+  document.getElementById("trombi").innerHTML = html || `<div class="note"><span>Aucun invité ne correspond à ces filtres.</span></div>`;
+  // même base que les chiffres du haut : +1 nommés compris ; les mariés ne sont pas dans la grille
+  const maries = guests.filter(g => g.couple && matches(g)).length;
+  const total = all.length + maries + (state.p1 ? p1count : 0);
+  const dont = [maries ? (maries === 2 ? "les 2 mariés" : "1 marié") : "", state.p1 && p1count ? `${p1count} +1 à confirmer` : ""].filter(Boolean);
+  document.getElementById("count").textContent = `${total} invité${total > 1 ? "s" : ""}${dont.length ? ` (dont ${dont.join(" et ")})` : ""}`;
+}
+function wireTrombi() {
+  document.getElementById("q").addEventListener("input", e => { state.q = e.target.value.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase().trim(); renderTrombi(); });
+  document.getElementById("side-seg").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    state.side = b.dataset.side;
+    b.parentElement.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b));
+    renderTrombi();
+  });
+  document.getElementById("lien-chips").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    const on = b.getAttribute("aria-pressed") !== "true"; b.setAttribute("aria-pressed", on);
+    on ? state.liens.add(b.dataset.lien) : state.liens.delete(b.dataset.lien); renderTrombi();
+  });
+  document.getElementById("ev-chips").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    const on = b.getAttribute("aria-pressed") !== "true"; b.setAttribute("aria-pressed", on);
+    on ? state.evs.add(b.dataset.ev) : state.evs.delete(b.dataset.ev); renderTrombi();
+  });
+  document.getElementById("groupby").addEventListener("change", e => { state.groupby = e.target.value; try { localStorage.setItem("trombi-state", JSON.stringify({ groupby: state.groupby })); } catch (err) {} renderTrombi(); });
+  document.getElementById("show-p1").addEventListener("change", e => { state.p1 = e.target.checked; renderTrombi(); });
+  document.getElementById("show-age").addEventListener("change", e => { state.ages = e.target.checked; renderTrombi(); });
+  document.getElementById("reponse").addEventListener("change", e => { state.rep = e.target.value; renderTrombi(); });
+  document.addEventListener("click", e => { const c = e.target.closest("[data-id]"); if (c) openDrawer(+c.dataset.id); });
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape") closeDrawer();
+    if (e.key === "Enter") { const c = e.target.closest && e.target.closest(".card[data-id]"); if (c) openDrawer(+c.dataset.id); }
+  });
+}
+
+/* ---------- Fiche invité ---------- */
+function openDrawer(id) {
+  const g = byId[id]; if (!g) return;
+  const sameGroup = g.lien === "Amis" && g.groupe ? people.filter(x => x.lien === "Amis" && x.groupe === g.groupe && x.id !== g.id) : [];
+  const sameFam = g.lien === "Famille éloignée" ? people.filter(x => x.foyer === g.foyer && x.id !== g.id)
+    : g.lien === "Famille proche" || g.couple ? people.filter(x => x.cote === g.cote && x.lien === "Famille proche" && x.id !== g.id && ROLE[x.id]) : [];
+  const mini = arr => `<div class="mini">${arr.map(x => `<button data-id="${x.id}">${avatar(x)}${fullName(x)}</button>`).join("")}</div>`;
+  const d = document.getElementById("drawer");
+  d.innerHTML = `
+    <button class="drawer__close" id="d-close">Fermer</button>
+    <div class="drawer__id">${avatar(g)}<div><h2 id="d-name">${fullName(g)}</h2>
+      <div class="card__tags" style="justify-content:flex-start;margin-top:6px">
+        ${g.cote ? `<span class="tag tag--side-${g.cote}">Côté ${g.cote}</span>` : `<span class="tag tag--todo">Côté à préciser</span>`}
+        ${ROLE[g.id] ? `<span class="tag tag--lien">${ROLE[g.id]}</span>` : g.lien && g.lien !== "Autre" ? `<span class="tag tag--lien">${LIEN_LABEL[g.lien] || g.lien}</span>` : ""}
+        ${(EXTRA[g.id] || []).map(x => `<span class="tag tag--special">${x}</span>`).join("")}
+        ${sub(g) && !g.couple && !ROLE[g.id] ? `<span class="tag tag--groupe">${sub(g)}</span>` : ""}
+      </div></div></div>
+    <div><h3>Réponse à l'invitation</h3>${g.valide ? `<span class="ok-pill">${checkIcon} Validé</span>` : `<span class="ok-pill ok-pill--wait">En attente de réponse</span>`}</div>
+    <div><h3>Âge</h3><p style="margin:0;font-size:.95rem;font-weight:700">${g.naissance ? `${ageTxt(g)}, ${gw(g.prenom, "né", "née")} le ${dateFr(g.naissance)}${g.naissance.includes("X") ? `<br><span style="color:var(--ink-soft);font-weight:600;font-size:.85rem">Année incomplète : l'âge est donné en fourchette.</span>` : ""}` : `<span style="color:var(--ink-soft);font-weight:600">Date de naissance à renseigner. L'âge sera calculé automatiquement à la date du jour.</span>`}</p></div>
+    ${g.photo ? "" : `<div class="photo-drop">Pas encore de photo : les initiales s'affichent à la place.</div>`}
+    ${(() => {
+      const ln = [...GODLINKS.filter(l => l.to === g).map(l => [gw(l.from.prenom, "Parrain", "Marraine"), l.from]), ...GODLINKS.filter(l => l.from === g).map(l => [gw(l.to.prenom, "Filleul", "Filleule"), l.to])];
+      const tem = g.couple ? people.filter(x => TEMOIN_OF[x.id] === g.cote).map(x => ["Témoin", x]) : [];
+      const all = [...ln, ...tem];
+      return all.length ? `<div><h3>Parrainage et témoins</h3><div class="mini">${all.map(([l, x]) => `<button data-id="${x.id}">${avatar(x)}<span><small style="color:var(--green);font-weight:800">${l}</small> ${fullName(x)}</span></button>`).join("")}</div></div>` : "";
+    })()}
+    ${(() => {
+      const f = FAMILLES_HORS_ARBRE.find(f => f.parents.includes(g) || f.enfants.includes(g)); if (!f) return "";
+      const rows = f.enfants.includes(g)
+        ? [["Parents", f.parents], [gw(g.prenom, "Frères et sœurs", "Frères et sœurs"), f.enfants.filter(x => x !== g)]]
+        : [[gw(g.prenom, "Femme", "Mari"), f.parents.filter(x => x !== g)], ["Enfants", f.enfants]];
+      return `<div><h3>Famille</h3>${rows.filter(r => r[1].length).map(([l, arr]) => `<div class="mini" style="margin-bottom:6px">${arr.map(x => `<button data-id="${x.id}">${avatar(x)}<span><small style="color:var(--green);font-weight:800">${arr.length > 1 || l === "Parents" || l === "Enfants" ? l.replace(/s$/, "").replace("Frères et sœur", gw(x.prenom, "Frère", "Sœur")).replace("Parent", gw(x.prenom, "Père", "Mère")).replace("Enfant", gw(x.prenom, "Fils", "Fille")) : l}</small> ${fullName(x)}</span></button>`).join("")}</div>`).join("")}</div>`;
+    })()}
+    <div><h3>Invitations</h3><div class="evlist">${EVENTS.map(e => `<div><span>${e.l}</span><span class="${g.ev[e.k] ? "yes" : "no"}">${g.ev[e.k] ? "Oui" : "Non"}</span></div>`).join("")}</div></div>
+    ${PLUS[g.id] ? `<div><h3>Accompagnant</h3><div class="mini"><button data-id="${PLUS[g.id].id}">${avatar(PLUS[g.id])}${fullName(PLUS[g.id])}</button></div></div>` : ""}
+    ${hostOf(g) ? `<div><h3>Accompagne</h3><div class="mini"><button data-id="${hostOf(g).id}">${avatar(hostOf(g))}${fullName(hostOf(g))}</button></div></div>` : ""}
+    ${openP1(g) ? `<div><h3>Accompagnant</h3><div class="mini"><button disabled style="cursor:default">${`<span class="avatar avatar--ghost">+1</span>`}Nom à confirmer</button></div><p style="font-size:.82rem;color:var(--ink-soft);margin:6px 0 0">Une fois le nom connu, le +1 devient un invité à part entière, relié à ${g.prenom}.</p></div>` : ""}
+    ${sameGroup.length ? `<div><h3>Même bande : ${g.groupe}</h3>${mini(sameGroup)}</div>` : ""}
+    ${sameFam.length ? `<div><h3>${g.lien === "Famille éloignée" ? "Même foyer : " + g.foyer : "Famille proche côté " + g.cote}</h3>${mini(sameFam)}</div>` : ""}
+`;
+  d.hidden = false; document.getElementById("drawer-bg").hidden = false;
+  document.getElementById("d-close").focus();
+}
+function closeDrawer() { document.getElementById("drawer").hidden = true; document.getElementById("drawer-bg").hidden = true; }
+document.getElementById("drawer-bg").addEventListener("click", closeDrawer);
+document.getElementById("drawer").addEventListener("click", e => { if (e.target.id === "d-close") closeDrawer(); });
+
+/* ---------- Arbre généalogique unique (SVG) + entourage non relié ---------- */
+function renderTrees() { renderTree(); ["Arthur", "Mathilde", ""].forEach(renderLoose); }
+function renderTree() {
+  const SLOT = 86, R = 22, Y = [130, 280, 430, 580], PAD = 40, TREE_GAP = 0.5;
+  const key = r => r.join("|"), pos = {};
+  const width = u => Math.max(u.p ? (u.sp ? 2 : 1) : 0, u.kids.reduce((a, k) => a + width(k), 0));
+  const place = (u, left, d) => {
+    const w = width(u), cx = left + w * SLOT / 2;
+    if (u.p) { pos[key(u.p)] = { x: u.sp ? cx - SLOT / 2 : cx, y: Y[d] }; if (u.sp) pos[key(u.sp)] = { x: cx + SLOT / 2, y: Y[d] }; }
+    let kl = left + (w - u.kids.reduce((a, k) => a + width(k), 0)) * SLOT / 2;
+    u.kids.forEach(k => { place(k, kl, d + 1); kl += width(k) * SLOT; });
+  };
+  let left = PAD;
+  const tw = t => width(t.unit) + (t.extras ? t.extras.refs.length + 0.3 : 0);
+  TREE.forEach(t => {
+    if (t.detached) left += SLOT;
+    t.left = left; place(t.unit, left, t.depth || 0);
+    // personnes sans lien de parenté dans la branche, posées à droite (reliées par les parrainages)
+    if (t.extras) t.extras.refs.forEach((r, i) => pos[key(r)] = { x: left + (width(t.unit) + 0.3 + i + 0.5) * SLOT, y: Y[t.extras.row] });
+    left += (tw(t) + TREE_GAP) * SLOT;
+  });
+  const W = left - TREE_GAP * SLOT + PAD;
+  let s = "";
+  const sideCol = side => side === "Arthur" ? "#3A6E8C" : "#B05078";
+  const line = (d, col, dash) => s += `<path d="${d}" fill="none" stroke="${col}" stroke-width="2.4" ${dash ? 'stroke-dasharray="6 5"' : ""} stroke-linecap="round"/>`;
+  const draw = (u, d, col) => {
+    if (u.p && u.sp) { const a = pos[key(u.p)], b = pos[key(u.sp)]; line(`M${a.x + R},${a.y} H${b.x - R}`, col, u.spDash); }
+    if (u.kids.length) {
+      const fromP = !u.p ? null : (u.sp && u.kidsFrom !== "p") ? { x: (pos[key(u.p)].x + pos[key(u.sp)].x) / 2, y: Y[d] } : { x: pos[key(u.p)].x, y: Y[d] + R + 34 };
+      const by = Y[d + 1] - 70 - (u.link ? 12 : 0);
+      const xs = u.kids.map(k => pos[key(k.p)].x);
+      if (u.link) xs.push(pos[key(u.link)].x);
+      const all = fromP ? [...xs, fromP.x] : xs;
+      if (fromP) line(`M${fromP.x},${fromP.y} V${by}`, col, u.dash);
+      else s += `<text x="${(Math.min(...xs) + Math.max(...xs)) / 2}" y="${by - 10}" text-anchor="middle" font-size="11" font-weight="800" fill="${col}" letter-spacing="1">${u.label.toUpperCase()}</text>`;
+      line(`M${Math.min(...all)},${by} H${Math.max(...all)}`, col, u.dash);
+      xs.forEach(x => line(`M${x},${by} V${Y[d + 1] - R}`, col, u.dash));
+    }
+    u.kids.forEach(k => draw(k, d + 1, col));
+  };
+  TREE.forEach(t => draw(t.unit, t.depth || 0, sideCol(t.side)));
+  // branche détachée : cadre pointillé et titre
+  TREE.filter(t => t.detached).forEach(t => {
+    const x0 = t.left - SLOT / 2 + 8, x1 = t.left + tw(t) * SLOT + SLOT / 2 - 8;
+    const top = Y[t.depth || 0] - 58;
+    s += `<rect x="${x0}" y="${top}" width="${x1 - x0}" height="${Y[2] + R + 50 - top}" rx="18" fill="none" stroke="#F6D5E0" stroke-width="2" stroke-dasharray="8 6"/>`;
+    s += `<text x="${(x0 + x1) / 2}" y="${top + 20}" text-anchor="middle" font-size="11" font-weight="800" fill="#B05078" letter-spacing="1">${t.detached.toUpperCase()}</text><text x="${(x0 + x1) / 2}" y="${top + 34}" text-anchor="middle" font-size="10" font-weight="700" fill="#5d7488">${t.sub}</text>`;
+  });
+  // le mariage : un arc sous la rangée des mariés
+  const a = pos[key(C_("Arthur"))], m = pos[key(T_("Mathilde"))], ay = Y[2] + R + 38, dip = Y[2] + R + 78, mid = (a.x + m.x) / 2;
+  s += `<path d="M${a.x},${Y[2] + R + 36} C${a.x},${dip} ${m.x},${dip} ${m.x},${Y[2] + R + 36}" fill="none" stroke="#B05078" stroke-width="3"/>`;
+  s += `<path d="M${a.x},${Y[2] + R + 36} C${a.x},${dip + 6} ${m.x},${dip + 6} ${m.x},${Y[2] + R + 36}" fill="none" stroke="#3A6E8C" stroke-width="3"/>`;
+  const cy = ay + (dip - ay) * 0.75 + 4;
+  s += `<rect x="${mid - 82}" y="${cy - 14}" width="164" height="28" rx="14" fill="#FFFFFF" stroke="#B05078" stroke-width="2"/><text x="${mid}" y="${cy + 5}" text-anchor="middle" font-size="13" font-weight="800" fill="#B05078">Arthur &amp; Mathilde</text>`;
+  ["Grands-parents", "Parents, oncles et tantes", "Mariés, frères, sœurs, cousins", "Enfants des cousins"].forEach((t, i) => s += `<text x="10" y="${Y[i] - 40}" font-size="10.5" font-weight="800" fill="#5d7488" letter-spacing="1.4">${t.toUpperCase()}</text>`);
+  // parrains et marraines : arcs verts au-dessus des nœuds
+  const seenLbl = {};
+  s += `<g id="godlinks">` + GODLINKS.map(({ from, to }) => {
+    const role = gw(from.prenom, "parrain", "marraine"), same = GODLINKS.filter(l => l.to === to && gw(l.from.prenom, "parrain", "marraine") === role).length;
+    const lbl = `${same > 1 ? role + "s" : role} ${deOf(to)}`, showLbl = !seenLbl[lbl]; seenLbl[lbl] = true;
+    const pa = Object.entries(pos).find(([k]) => find(...k.split("|")) === from), pb = Object.entries(pos).find(([k]) => find(...k.split("|")) === to);
+    if (!pa || !pb) return "";
+    const A = pa[1], B = pb[1], cx = (A.x + B.x) / 2, cy = Math.min(A.y, B.y) - R - 50 - Math.min(Math.abs(B.x - A.x) * 0.04, 50);
+    const lx = (A.x + 2 * cx + B.x) / 4, ly = (A.y - R + 2 * cy + B.y - R) / 4;
+    return `<path d="M${A.x},${A.y - R} Q${cx},${cy} ${B.x},${B.y - R}" fill="none" stroke="#4E7A60" stroke-width="2" stroke-dasharray="2 5" stroke-linecap="round"/>
+      <circle cx="${B.x}" cy="${B.y - R - 3}" r="3.5" fill="#4E7A60"/>
+      ${showLbl ? `<text x="${lx}" y="${ly + 4}" text-anchor="middle" font-size="10" font-weight="800" fill="#4E7A60" stroke="#FFFFFF" stroke-width="4" paint-order="stroke">${lbl}</text>` : ""}`;
+  }).join("") + `</g>`;
+  Object.entries(pos).forEach(([k, p]) => {
+    const g = find(...k.split("|")); if (!g) return;
+    const c = g.cote === "Arthur" ? "#3A6E8C" : g.cote === "Mathilde" ? "#B05078" : "#5d7488", r = g.couple ? R + 5 : R;
+    s += `<g class="tree-node${g.valide ? "" : " is-wait"}" data-id="${g.id}" tabindex="0" role="button" aria-label="${fullName(g)}${ROLE[g.id] ? ", " + ROLE[g.id] : ""}">
+      <circle cx="${p.x}" cy="${p.y}" r="${r}" fill="${c}" stroke="${g.couple ? "#F6D5E0" : "#FFFFFF"}" stroke-width="3"/>
+      <text x="${p.x}" y="${p.y + 5}" text-anchor="middle" fill="#FFFFFF" font-size="${g.couple ? 15 : 13}" font-weight="800">${initials(g)}</text>
+      <text x="${p.x}" y="${p.y + r + 16}" text-anchor="middle" fill="#34526A" font-size="12.5" font-weight="800">${g.prenom}</text>
+      <text x="${p.x}" y="${p.y + r + 29}" text-anchor="middle" fill="#5d7488" font-size="9.5" font-weight="700" letter-spacing=".4">${g.nom}</text>
+      ${openP1(g) ? `<g><circle cx="${p.x + r * 0.8}" cy="${p.y + r * 0.7}" r="10" fill="#FFFFFF" stroke="#B05078" stroke-width="1.5" stroke-dasharray="3 2"/><text x="${p.x + r * 0.8}" y="${p.y + r * 0.7 + 3.5}" text-anchor="middle" font-size="9" font-weight="800" fill="#B05078">+1</text></g>` : ""}
+    </g>`;
+    const pt = PLUS[g.id];
+    if (pt) {
+      const pc = pt.cote === "Arthur" ? "#3A6E8C" : "#B05078";
+      s += `<g class="tree-node${pt.valide || !g.valide ? "" : " is-wait"}" data-id="${pt.id}" role="button" aria-label="${fullName(pt)}, +1 de ${g.prenom}"><circle cx="${p.x + r * 0.8}" cy="${p.y + r * 0.7}" r="11" fill="${pc}" stroke="#FFFFFF" stroke-width="2"/><text x="${p.x + r * 0.8}" y="${p.y + r * 0.7 + 3.5}" text-anchor="middle" font-size="8.5" font-weight="800" fill="#FFFFFF">${initials(pt)}</text></g>`;
+    }
+  });
+  const H = Y[3] + R + 50;
+  s += `<text x="${W - 10}" y="${H - 8}" text-anchor="end" font-size="11" fill="#5d7488" font-weight="700">Trait plein : lien de parenté. Petits points verts : parrain ou marraine (le point marque le filleul).</text>`;
+  const svg = document.getElementById("tree");
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.dataset.w = W;
+  svg.innerHTML = s;
+  setTreeFit(false);
+  // centrer la vue sur les mariés
+  const box = document.getElementById("tree-scroll");
+  requestAnimationFrame(() => { box.scrollLeft = Math.max(0, mid - box.clientWidth / 2); });
+}
+function setTreeFit(fit) {
+  const svg = document.getElementById("tree");
+  svg.style.width = fit ? "100%" : svg.dataset.w + "px";
+  const b = document.getElementById("tree-fit");
+  b.setAttribute("aria-pressed", fit);
+  b.textContent = fit ? "Taille réelle" : "Vue d'ensemble";
+}
+document.getElementById("show-god").addEventListener("change", e => { const g = document.getElementById("godlinks"); if (g) g.style.display = e.target.checked ? "" : "none"; });
+document.getElementById("tree-fit").addEventListener("click", e => setTreeFit(e.currentTarget.getAttribute("aria-pressed") !== "true"));
+function renderLoose(side) {
+  // liste simple, sans répartition ; les témoins d'abord ; un +1 renseigné s'affiche en pastille sur son hôte
+  const rest = people.filter(g => g.cote === side && !IN_TREE.has(g.id) && !g.plusOneOf)
+    .sort((a, b) => (!!TEMOIN_OF[b.id] - !!TEMOIN_OF[a.id]) || (!a.nom - !b.nom) || (a.nom || "").localeCompare(b.nom || "") || a.prenom.localeCompare(b.prenom));
+  const pill = g => PLUS[g.id] ? `<span class="p1pill${PLUS[g.id].valide || !g.valide ? "" : " is-wait"}" data-id="${PLUS[g.id].id}" data-side="${PLUS[g.id].cote}" title="+1 : ${fullName(PLUS[g.id])}">${initials(PLUS[g.id])}</span>`
+    : openP1(g) ? `<span class="p1pill p1pill--open" title="+1 à confirmer">+1</span>` : "";
+  const node = g => `<button class="lnode${TEMOIN_OF[g.id] ? " lnode--temoin" : ""}${g.valide ? "" : " is-wait"}" data-id="${g.id}"${TEMOIN_OF[g.id] ? ` data-of="${TEMOIN_OF[g.id]}"` : ""}><span class="lwrap">${avatar(g)}${pill(g)}</span><b>${g.prenom.replace(" ?", "") || "?"}</b><small>${g.nom || ""}${PLUS[g.id] ? `<br>+ ${PLUS[g.id].prenom}` : ""}</small>${TEMOIN_OF[g.id] ? `<span class="temoin-badge">Témoin</span>` : ""}</button>`;
+  document.getElementById("loose-" + (side || "none")).innerHTML = rest.length ? `<div class="loose__people">${rest.map(node).join("")}</div>` : "";
+  if (!side) document.getElementById("none-col").hidden = !rest.length;
+}
+
+
+/* ---------- Diagramme radial (d3), filtrable et animé ---------- */
+const arbreEvs = new Set();
+const arbreMatch = g => [...arbreEvs].every(e => g.ev[e]);
+function renderRadial() {
+  if (!window.d3) { document.getElementById("radial").outerHTML = `<p>Le diagramme n'a pas pu se charger.</p>`; return; }
+  const root = { name: "Arthur & Mathilde", key: "root", children: [] };
+  ["Arthur", "Mathilde", ""].forEach(side => {
+    const sideNode = { name: side ? "Côté " + side : "À préciser", key: "s:" + side, side, children: [] };
+    [...LIENS, ""].forEach(l => {
+      const arr = people.filter(g => g.cote === side && g.lien === l && arbreMatch(g));
+      if (!arr.length) return;
+      const ln = { name: LIEN_LABEL[l], key: `l:${side}:${l}`, side, children: [] };
+      const subs = new Map();
+      // une bande d'une seule personne rejoint les invités sans bande
+      const cnt = {}; arr.forEach(g => { const k = sub(g) || ""; cnt[k] = (cnt[k] || 0) + 1; });
+      arr.forEach(g => { let k = sub(g) || ""; if (cnt[k] < 2) k = ""; if (!subs.has(k)) subs.set(k, []); subs.get(k).push(g); });
+      [...subs.entries()].forEach(([k, gs]) => {
+        // chaque +1 renseigné est placé juste après la personne qu'il accompagne
+        const ordered = gs.filter(g => !(hostOf(g) && gs.includes(hostOf(g)))).flatMap(g => PLUS[g.id] && gs.includes(PLUS[g.id]) ? [g, PLUS[g.id]] : [g]);
+        const leaves = ordered.map(g => ({ name: fullName(g) || g.prenom, key: "p:" + g.id, side, id: g.id, p1: openP1(g), host: g.plusOneOf || null, wait: !g.valide }));
+        if (k && gs.length > 1) ln.children.push({ name: k, key: `g:${side}:${l}:${k}`, side, children: leaves });
+        else ln.children.push(...leaves);
+      });
+      sideNode.children.push(ln);
+    });
+    if (sideNode.children.length) root.children.push(sideNode);
+  });
+  const W = 1300, radius = W / 2 - 175, T = matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 750;
+  const h = d3.hierarchy(root);
+  d3.cluster().size([2 * Math.PI, radius]).separation((a, b) => (a.parent === b.parent ? 1 : 1.6) / a.depth)(h);
+  const color = s => s === "Arthur" ? "#3A6E8C" : s === "Mathilde" ? "#B05078" : "#5d7488";
+  const svg = d3.select("#radial").attr("viewBox", [-W / 2, -W / 2, W, W]);
+  if (svg.select("g.r-links").empty()) {
+    ["r-links", "r-nodes", "r-labels", "r-plus"].forEach(c => svg.append("g").attr("class", c));
+    svg.append("text").attr("text-anchor", "middle").attr("dy", "0.35em").attr("font-family", "Funnel Display, Mulish, sans-serif")
+      .attr("font-size", 15).attr("font-weight", 800).attr("fill", "#B05078")
+      .attr("stroke", "#FFFFFF").attr("stroke-width", 5).attr("paint-order", "stroke").text("Arthur & Mathilde");
+  }
+  const rot = (x, y) => `rotate(${x * 180 / Math.PI - 90}) translate(${y},0)`;
+  const xy = (a, r) => [Math.cos(a - Math.PI / 2) * r, Math.sin(a - Math.PI / 2) * r];
+  const radialLink = d3.linkRadial().angle(d => d.x).radius(d => d.y);
+  const tr = d3.transition().duration(T).ease(d3.easeCubicInOut);
+  // liens de l'arbre : les extrémités glissent vers leur nouvelle place
+  svg.select("g.r-links").attr("fill", "none").attr("stroke-opacity", 0.45).attr("stroke-width", 1.4)
+    .selectAll("path").data(h.links().filter(l => !l.target.data.host), d => d.target.data.key)
+    .join(
+      enter => enter.append("path").attr("stroke", d => color(d.target.data.side)).attr("opacity", 0)
+        .attr("d", radialLink).each(function (d) { this.__p = { s: { x: d.source.x, y: d.source.y }, t: { x: d.target.x, y: d.target.y } }; }),
+      update => update,
+      exit => exit.transition(tr).attr("opacity", 0).remove())
+    .transition(tr).attr("opacity", 1)
+    .attrTween("d", function (d) {
+      const p = this.__p || { s: d.source, t: d.target }, n = { s: { x: d.source.x, y: d.source.y }, t: { x: d.target.x, y: d.target.y } };
+      const i = d3.interpolate(p, n); this.__p = n;
+      return t => radialLink({ source: i(t).s, target: i(t).t });
+    });
+  // personnes et embranchements
+  svg.select("g.r-nodes").selectAll("g.rn").data(h.descendants(), d => d.data.key)
+    .join(
+      enter => {
+        const g = enter.append("g").attr("class", "rn").attr("opacity", 0).attr("transform", d => rot(d.x, d.y))
+          .each(function (d) { this.__p = { x: d.x, y: d.y }; });
+        g.append("circle").attr("stroke-width", 1.5);
+        g.filter(d => !d.children && d.data.id).append("text").attr("dy", "0.32em").attr("font-size", 10.5).attr("font-weight", 700).attr("fill", "#34526A")
+          .text(d => d.data.name + (d.data.p1 ? " +1" : ""));
+        return g;
+      },
+      update => update,
+      exit => exit.transition(tr).attr("opacity", 0).remove())
+    .attr("class", d => "rn" + (d.data.id ? " tree-node" + (d.data.wait ? " is-wait" : "") : ""))
+    .attr("data-id", d => d.data.id || null)
+    .call(g => g.select("circle")
+      .attr("r", d => d.depth === 0 ? 0 : d.children ? 4.5 : 3.5)
+      .attr("fill", d => d.data.host ? "#FFFFFF" : color(d.data.side))
+      .attr("stroke", d => color(d.data.side)))
+    .call(g => g.select("text")
+      .attr("x", d => d.x < Math.PI ? 7 : -7)
+      .attr("text-anchor", d => d.x < Math.PI ? "start" : "end")
+      .attr("transform", d => d.x >= Math.PI ? "rotate(180)" : null))
+    .transition(tr).attr("opacity", 1)
+    .attrTween("transform", function (d) {
+      const p = this.__p || { x: d.x, y: d.y }, i = d3.interpolate(p, { x: d.x, y: d.y }); this.__p = { x: d.x, y: d.y };
+      return t => rot(i(t).x, i(t).y);
+    });
+  // libellés des branches, posés à plat pour rester lisibles
+  svg.select("g.r-labels").selectAll("text").data(h.descendants().filter(d => d.children && d.depth > 0), d => d.data.key)
+    .join(
+      enter => enter.append("text").attr("dy", "-0.6em").attr("text-anchor", "middle").attr("opacity", 0)
+        .attr("font-size", d => d.depth === 1 ? 14 : d.depth === 2 ? 11.5 : 10).attr("font-weight", 800).attr("fill", d => color(d.data.side))
+        .attr("stroke", "#FFFFFF").attr("stroke-width", 4).attr("paint-order", "stroke").text(d => d.data.name)
+        .attr("transform", d => { const [x, y] = xy(d.x, d.y); return `translate(${x},${y})`; }),
+      update => update,
+      exit => exit.transition(tr).attr("opacity", 0).remove())
+    .transition(tr).attr("opacity", 1)
+    .attr("transform", d => { const [x, y] = xy(d.x, d.y); return `translate(${x},${y})`; });
+  // lien entre un +1 et son invité : trait droit entre leurs deux points
+  const byLeaf = new Map(h.leaves().map(d => [d.data.id, d]));
+  svg.select("g.r-plus").selectAll("path").data(h.leaves().filter(d => d.data.host && byLeaf.get(d.data.host)), d => d.data.key)
+    .join(enter => enter.append("path").attr("opacity", 0), update => update, exit => exit.transition(tr).attr("opacity", 0).remove())
+    .attr("class", d => d.data.wait ? "is-wait" : null)
+    .attr("fill", "none").attr("stroke", d => color(d.data.side)).attr("stroke-width", 2.2).attr("stroke-linecap", "round")
+    .transition(tr).attr("opacity", 1)
+    .attr("d", d => { const o = byLeaf.get(d.data.host), [x1, y1] = xy(o.x, o.y), [x2, y2] = xy(d.x, d.y); return `M${x1},${y1} L${x2},${y2}`; });
+}
+
+/* filtre « Invité à » commun à l'arbre et au diagramme */
+function applyArbreFilter() {
+  const on = el => { const g = byId[+el.dataset.id]; return !g || arbreMatch(g); };
+  document.querySelectorAll("#tree .tree-node[data-id], .lnode[data-id], .p1pill[data-id]").forEach(el => el.classList.toggle("is-out", !on(el)));
+  const n = guests.filter(arbreMatch).length, p = people.filter(g => openP1(g) && arbreMatch(g)).length;
+  const c = document.getElementById("arbre-count");
+  c.hidden = !arbreEvs.size;
+  c.innerHTML = arbreEvs.size ? `${n + p} personnes${p ? `, dont ${p} +1 à confirmer` : ""}<button type="button" id="arbre-reset">Tout afficher</button>` : "";
+  if (radialDone) renderRadial();
+}
+document.getElementById("arbre-ev").innerHTML = EVENTS.map(e => `<button data-ev="${e.k}" aria-pressed="false">${e.l}</button>`).join("");
+document.getElementById("arbre-count").addEventListener("click", e => {
+  if (e.target.id !== "arbre-reset") return;
+  arbreEvs.clear(); document.querySelectorAll("#arbre-ev button").forEach(b => b.setAttribute("aria-pressed", "false")); applyArbreFilter();
+});
+document.getElementById("arbre-ev").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  const on = b.getAttribute("aria-pressed") !== "true"; b.setAttribute("aria-pressed", on);
+  on ? arbreEvs.add(b.dataset.ev) : arbreEvs.delete(b.dataset.ev); applyArbreFilter();
+});
+
+/* ---------- Plan de table ---------- */
+function renderTables() {
+  const repas = people.filter(g => g.ev.repas);
+  const p1 = repas.filter(openP1).length;
+  const tot = repas.length + 2;
+  document.getElementById("tables-sub").textContent = `${tot} personnes au repas avec les mariés, et jusqu'à ${p1} accompagnants en plus. Il faudrait environ ${Math.ceil(tot / 10)} à ${Math.ceil((tot + p1) / 10)} tables de 10.`;
+  document.getElementById("toplace-sub").textContent = `${repas.length} invités au repas, aucun placé.`;
+  const by = new Map();
+  repas.forEach(g => { const k = g.lien || ""; if (!by.has(k)) by.set(k, []); by.get(k).push(g); });
+  document.getElementById("toplace").innerHTML = [...LIENS, ""].filter(k => by.has(k)).map(k =>
+    `<h4>${LIEN_LABEL[k]} (${by.get(k).length})</h4>` + by.get(k).map(g => `<div class="seatable" data-id="${g.id}">${avatar(g)}<span>${fullName(g)}</span>${openP1(g) ? "<small>+1</small>" : ""}</div>`).join("")).join("");
+}
+
+
+/* ---------- Navigation ---------- */
+const VIEWS = ["trombi", "arbre", "tables"].filter(v => !document.getElementById("tab-" + v).hidden); // plan de table masqué pour l'instant
+let radialDone = false;
+function show(v) {
+  if (!VIEWS.includes(v)) v = "trombi";
+  VIEWS.forEach(x => {
+    document.getElementById("view-" + x).hidden = x !== v;
+    document.getElementById("tab-" + x).setAttribute("aria-selected", x === v);
+  });
+  if (v === "arbre" && !radialDone) { renderRadial(); radialDone = true; }
+}
+document.querySelector(".tabs").addEventListener("click", e => { const b = e.target.closest(".tab"); if (b) { location.hash = b.dataset.view; show(b.dataset.view); } });
+window.addEventListener("hashchange", () => show(location.hash.slice(1)));
+
+renderStats(); buildFilters(); wireTrombi(); renderTrombi(); renderTrees(); renderTables();
+show(location.hash.slice(1));
+</script>
+</body>
+</html>
