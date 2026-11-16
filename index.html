@@ -168,7 +168,7 @@ select { font: inherit; font-weight: 700; color: var(--ink); background: var(--w
 .card--wait:hover, .card--wait:focus-visible { opacity: 0.95; }
 .card__ok { position: absolute; top: 10px; left: 10px; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: var(--green); color: var(--white); }
 .card__ok svg { width: 13px; height: 13px; }
-.ok-pill { display: inline-flex; align-items: center; gap: 6px; font-weight: 800; font-size: .9rem; color: var(--green); }
+.ok-pill { display: inline-flex; align-items: center; gap: 6px; font-weight: 800; font-size: 1.3rem; color: var(--green); }
 .ok-pill--wait { color: var(--ink-soft); }
 .card__plus1 {
   position: absolute; top: 10px; right: 10px; font-size: 0.7rem; font-weight: 800; color: var(--rose);
@@ -404,7 +404,7 @@ svg text { font-family: var(--font-body); }
             <label class="toggle"><input type="checkbox" id="show-p1" checked> Afficher les +1 potentiels</label>
             <label class="toggle"><input type="checkbox" id="show-age"> Afficher les âges</label>
             <label class="lbl" for="reponse">Réponse</label>
-            <select id="reponse"><option value="">Toutes</option><option value="ok">Validé</option><option value="wait">En attente</option></select>
+            <select id="reponse"><option value="">Toutes</option><option value="ok">✅ Validé</option><option value="wait">⏳ En attente</option></select>
           </div>
           <span class="count" id="count"></span>
         </div>
@@ -690,7 +690,7 @@ function ghostCard(g) {
 const COLS = [
   { k: "nom", l: "Invité" }, { k: "cote", l: "Côté" }, { k: "lien", l: "Lien" }, { k: "sub", l: "Bande, foyer" },
   ...EVENTS.map(e => ({ k: "ev:" + e.k, l: e.s, title: e.l, ev: true })),
-  { k: "p1", l: "+1" }, { k: "rep", l: "Réponse" }, { k: "age", l: "Âge", opt: "ages" },
+  { k: "p1", l: "+1" }, { k: "rep", l: "Réponse", ev: true }, { k: "age", l: "Âge", opt: "ages" },
 ];
 const cols = () => COLS.filter(c => !c.opt || state[c.opt]); // l'âge suit la case « Afficher les âges »
 const sortVal = (g, k) => k === "nom" ? `${g.nom} ${g.prenom}` : k === "cote" ? g.cote : k === "lien" ? (ROLE[g.id] || g.lien) : k === "sub" ? (sub(g) || "")
@@ -710,7 +710,7 @@ function row(g, host) {
     <td>${ROLE[g.id] ? "" : (sub(g) || "")}</td>
     ${EVENTS.map(e => `<td class="tev">${g.ev[e.k] ? yes : no}</td>`).join("")}
     <td>${p1}</td>
-    <td>${g.valide ? `<span class="tok">Validé</span>` : `<span class="tmuted">En attente</span>`}</td>
+    <td class="tev">${g.valide ? `<span role="img" aria-label="Validé" title="Validé">✅</span>` : `<span role="img" aria-label="En attente" title="En attente">⏳</span>`}</td>
     ${state.ages ? `<td class="tnum">${ageOf(g) === null ? `<span class="tmuted">?</span>` : ageTxt(g)}</td>` : ""}
   </tr>`;
 }
@@ -833,7 +833,7 @@ function openDrawer(id) {
         ${(EXTRA[g.id] || []).map(x => `<span class="tag tag--special">${x}</span>`).join("")}
         ${sub(g) && !g.couple && !ROLE[g.id] ? `<span class="tag tag--groupe">${sub(g)}</span>` : ""}
       </div></div></div>
-    <div><h3>Réponse à l'invitation</h3>${g.valide ? `<span class="ok-pill">${checkIcon} Validé</span>` : `<span class="ok-pill ok-pill--wait">En attente de réponse</span>`}</div>
+    <div><h3>Réponse à l'invitation</h3>${g.valide ? `<span class="ok-pill" role="img" aria-label="Validé" title="Validé">✅</span>` : `<span class="ok-pill ok-pill--wait" role="img" aria-label="En attente de réponse" title="En attente de réponse">⏳</span>`}</div>
     <div><h3>Âge</h3><p style="margin:0;font-size:.95rem;font-weight:700">${g.naissance ? `${ageTxt(g)}, ${gw(g.prenom, "né", "née")} le ${dateFr(g.naissance)}${g.naissance.includes("X") ? `<br><span style="color:var(--ink-soft);font-weight:600;font-size:.85rem">Année incomplète : l'âge est donné en fourchette.</span>` : ""}` : `<span style="color:var(--ink-soft);font-weight:600">Date de naissance à renseigner. L'âge sera calculé automatiquement à la date du jour.</span>`}</p></div>
     ${g.photo ? "" : `<div class="photo-drop">Pas encore de photo : les initiales s'affichent à la place.</div>`}
     ${(() => {
