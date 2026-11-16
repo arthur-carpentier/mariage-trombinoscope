@@ -507,7 +507,7 @@ const guests = RAW.map(g => ({ ...g, nomAff: g.nom, todo: [] }));
 guests.forEach(g => {
   if (g.groupe === "Marié") { g.cote = "Arthur"; g.lien = "Mariés"; g.couple = true; }
   if (g.groupe === "Mariée") { g.cote = "Mathilde"; g.lien = "Mariés"; g.couple = true; }
-  if (g.lien === "Travail") g.groupe = g.cote === "Arthur" ? "VOTREX" : (g.groupe || "Travail");
+  if (g.lien === "Travail") g.groupe = g.cote === "Arthur" ? "vorteX-io" : (g.groupe || "Travail");
   if (["Ami proche", "Copains", "Travail"].includes(g.lien)) g.lien = "Amis";
   if (g.groupe === "Belges") g.lien = "Famille éloignée";
   g.naissance = g.naissance || null; // date de naissance AAAA-MM-JJ, à renseigner
