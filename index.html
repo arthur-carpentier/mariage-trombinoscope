@@ -446,7 +446,7 @@ svg text { font-family: var(--font-body); }
           <h2>Arbre généalogique</h2>
           <p>Famille d'Arthur à gauche, famille de Mathilde à droite. Un clic sur une personne ouvre sa fiche.</p>
         </div>
-        <div class="toolbar__row" style="margin-bottom: 10px;"><button class="chipbtn" id="tree-fit" aria-pressed="false">Vue d'ensemble</button><label class="toggle"><input type="checkbox" id="show-god" checked> Parrains et marraines</label></div>
+        <div class="toolbar__row" style="margin-bottom: 10px;"><button class="chipbtn" id="tree-fit" aria-pressed="false">Vue d'ensemble</button><label class="toggle"><input type="checkbox" id="show-god"> Parrains et marraines</label></div>
         <div class="scroll-x" id="tree-scroll"><svg id="tree" style="height: auto; display: block;" role="img" aria-label="Arbre généalogique d'Arthur et Mathilde"></svg></div>
         <div class="entourage">
           <div class="entourage__col" data-side="Arthur"><h3>Côté Arthur, hors famille</h3><div class="loose" id="loose-Arthur"></div></div>
@@ -977,6 +977,7 @@ function renderTree() {
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
   svg.dataset.w = W;
   svg.innerHTML = s;
+  document.getElementById("godlinks").style.display = document.getElementById("show-god").checked ? "" : "none"; // parrainages masqués par défaut
   setTreeFit(false);
   // centrer la vue sur les mariés
   const box = document.getElementById("tree-scroll");
