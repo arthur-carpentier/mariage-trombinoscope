@@ -60,11 +60,11 @@ Pour un refus, il suffit de retirer la ligne de l'invité.
 ## Photos
 
 ```
-python3 outils/photo.py NOM Prénom image.jpg CX CY COTE
+python3 outils/photo.py NOM Prénom image.jpg CX CY COTE [--couleurs[=FORCE]]
 CODE="…" node outils/donnees.mjs publier
 ```
 
-`CX`, `CY` : centre du visage dans l'image d'origine, en pixels ; `COTE` : côté du carré à garder. La photo est recadrée en carré sans être étirée, réduite à 256 px et rangée dans `prive/donnees.json`. La page l'affiche en rond. Elle n'est publiée en clair que pour les invités qui ont validé.
+`CX`, `CY` : centre du visage dans l'image d'origine, en pixels ; `COTE` : côté du carré à garder. La photo est recadrée en carré sans être étirée, réduite à 256 px et rangée dans `prive/donnees.json`. La page l'affiche en rond. `--couleurs` corrige une dominante (photo trop rose ou trop rouge) ; `FORCE` va de 0 à 1 (0.85 par défaut), à baisser si la photo devient trop froide. Elle n'est publiée en clair que pour les invités qui ont validé.
 
 ## Mise en ligne
 
