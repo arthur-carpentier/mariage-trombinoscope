@@ -46,11 +46,11 @@ function versionPublique(d) {
   });
   // arbre : on ne garde que les personnes validées (et la structure qui les relie)
   const elaguer = u => {
-    const kids = (u.kids || []).map(elaguer).filter(Boolean);
+    const kids = (u.kids || []).map(elaguer).filter(Boolean), kidsP = (u.kidsP || []).map(elaguer).filter(Boolean);
     const p = valide(u.p) ? u.p : undefined, sp = valide(u.sp) ? u.sp : undefined;
-    if (!p && !sp && !kids.length) return null;
-    const { link, label, ...reste } = u;
-    return { ...reste, p, sp, kids };
+    if (!p && !sp && !kids.length && !kidsP.length) return null;
+    const { link, label, kidsP: _, ...reste } = u;
+    return { ...reste, p, sp, kids, ...(kidsP.length ? { kidsP } : {}) };
   };
   const tree = d.tree.map(t => ({ ...t, unit: elaguer(t.unit) })).filter(t => t.unit);
   return {
