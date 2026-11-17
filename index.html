@@ -588,6 +588,9 @@ const P = ref => find(...ref) || { prenom: ref[1] };
 const U = (p, o = {}) => ({ p, kids: [], ...o });
 const C_ = n => ["CARPENTIER", n], T_ = n => ["TAUVERON", n];
 const TREE = DATA.tree; // arbre de famille (dans les données ; la version publique ne contient que les personnes validées)
+// kidsP : enfants d'un seul des deux parents (la personne « p »), reliés à ce parent seul ; rangés après les autres enfants, ou avant avec kidsPFirst
+const normaliser = u => { if (!u) return; if (u.kidsP) { const s = u.kidsP.map(k => ({ ...k, fromP: true })); u.kids = u.kidsPFirst ? [...s, ...(u.kids || [])] : [...(u.kids || []), ...s]; delete u.kidsP; } (u.kids || []).forEach(normaliser); };
+TREE.forEach(tr => normaliser(tr.unit));
 /* liens de famille hors de l'arbre : visibles seulement dans les fiches */
 const FAMILLES_HORS_ARBRE = (DATA.horsArbre || []).map(f => ({ parents: f.parents.map(r => find(...r)).filter(Boolean), enfants: f.enfants.map(r => find(...r)).filter(Boolean) }));
 const ROLE = {}, CATG = {}, UNIT_FOYER = {}, IN_TREE = new Set(), FAM = {}; // FAM : grande famille du diagramme
@@ -904,10 +907,17 @@ function renderTree() {
   const line = (d, col, dash) => s += `<path d="${d}" fill="none" stroke="${col}" stroke-width="2.4" ${dash ? 'stroke-dasharray="6 5"' : ""} stroke-linecap="round"/>`;
   const draw = (u, d, col) => {
     if (u.p && u.sp) { const a = pos[key(u.p)], b = pos[key(u.sp)]; line(`M${a.x + R},${a.y} H${b.x - R}`, col, u.spDash); }
-    if (u.kids.length) {
+    const seuls = u.kids.filter(k => k.fromP), communs = u.kids.filter(k => !k.fromP);
+    if (seuls.length && u.p) {
+      const px = pos[key(u.p)].x, by = Y[d + 1] - 56, xs = seuls.map(k => pos[key(k.p)].x);
+      line(`M${px},${Y[d] + R + 34} V${by}`, col);
+      line(`M${Math.min(px, ...xs)},${by} H${Math.max(px, ...xs)}`, col);
+      xs.forEach(x => line(`M${x},${by} V${Y[d + 1] - R}`, col));
+    }
+    if (communs.length || (u.link && u.kids.length)) {
       const fromP = !u.p ? null : (u.sp && u.kidsFrom !== "p") ? { x: (pos[key(u.p)].x + pos[key(u.sp)].x) / 2, y: Y[d] } : { x: pos[key(u.p)].x, y: Y[d] + R + 34 };
       const by = Y[d + 1] - 70 - (u.link ? 12 : 0);
-      const xs = u.kids.map(k => pos[key(k.p)].x);
+      const xs = communs.map(k => pos[key(k.p)].x);
       if (u.link) xs.push(pos[key(u.link)].x);
       const all = fromP ? [...xs, fromP.x] : xs;
       if (fromP) line(`M${fromP.x},${fromP.y} V${by}`, col, u.dash);
