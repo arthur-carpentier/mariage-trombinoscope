@@ -5,31 +5,55 @@ Site statique qui présente les invités du mariage : trombinoscope filtrable, a
 ## Contenu
 
 ```
-index.html        Page complète (styles et logique inclus)
-data/invites.js   Liste des invités
-CNAME             Domaine personnalisé pour GitHub Pages
+index.html           Page complète (styles et logique inclus)
+data/invites.js      Données générées : version publique en clair, liste complète chiffrée
+outils/donnees.mjs   Script pour extraire et republier les données
+CNAME                Domaine personnalisé pour GitHub Pages
+prive/               Liste complète en clair, jamais publiée (exclue par .gitignore)
 ```
 
 La page charge D3 depuis cdnjs pour le diagramme, et les polices Funnel Display et Mulish depuis Google Fonts.
 
+## Public et privé
+
+Par défaut, le site montre seulement les invités qui ont validé, sans les invitations ni l'arbre généalogique. La liste complète n'est publiée que chiffrée dans `data/invites.js` (AES-GCM, clé dérivée par PBKDF2).
+
 ## Modifier la liste des invités
 
-Tout se fait dans `data/invites.js`, une ligne par invité :
+1. Récupérer la liste complète en clair :
+   ```
+   CODE="…" node outils/donnees.mjs extraire
+   ```
+2. Modifier `prive/donnees.json`.
+3. Régénérer les données publiées :
+   ```
+   CODE="…" node outils/donnees.mjs publier
+   ```
+4. Committer `data/invites.js` (jamais `prive/`).
+
+`prive/donnees.json` contient :
+
+- `invites` : une entrée par invité ;
+- `tree` : l'arbre généalogique (famille directe, familles élargies, famille belge) ;
+- `godlinks` : parrains et marraines ;
+- `temoins` : témoins de chaque marié ;
+- `horsArbre` : liens de famille affichés seulement dans les fiches.
+
+Champs d'un invité :
 
 | Champ | Rôle |
 |---|---|
 | `nom`, `prenom` | Identité. Les initiales servent tant qu'il n'y a pas de photo. |
+| `pronom` | `il` ou `elle`. Sert à accorder les termes (cousin, cousine, accompagnant…). |
 | `cote` | `Arthur` ou `Mathilde` |
-| `lien` | `Famille proche`, `Famille éloignée`, `Ami proche`, `Copains`, `Travail`, `Autre` (les trois amis/travail sont regroupés en « Amis ») |
-| `groupe` | Bande d'amis (ENSAT, EKIP, Travail…) |
+| `lien` | `Famille proche` (affiché « Famille directe »), `Famille éloignée` (« Famille élargie »), `Ami proche`, `Copains`, `Travail`, `Autre` (amis et travail sont regroupés en « Amis ») |
+| `groupe` | Bande d'amis (ENSAT, EKIP, Travail, Vieux…) |
 | `ev` | Invitations : `mairie`, `eglise`, `vin`, `repas`, `brunch` |
 | `plus1` | `true` si la personne peut venir accompagnée |
-| `plusOneOf` | Pour un +1 nommé : `id` de la personne accompagnée. Il en reprend les invitations. |
-| `evOverride` | Exception pour un +1, par exemple `{"repas": false}` |
+| `plusOneOf` | Pour un accompagnant nommé : `id` de la personne accompagnée. Il en reprend les invitations. |
+| `evOverride` | Exception pour un accompagnant, par exemple `{"repas": false}` |
 | `naissance` | `AAAA-MM-JJ`. Un `X` dans l'année (`197X`) donne une fourchette d'âge. |
-| `valide` | `true` quand la personne a confirmé sa venue. Sinon, elle apparaît grisée. |
-
-Les liens de parenté, parrainages et témoins sont décrits dans `index.html` (constantes `TREE`, `GODLINKS`, `TEMOINS`, `FAMILLES_HORS_ARBRE`).
+| `valide` | `true` quand la personne a confirmé sa venue. Sinon, elle n'apparaît pas sur le site public. |
 
 Pour un refus, il suffit de retirer la ligne de l'invité.
 

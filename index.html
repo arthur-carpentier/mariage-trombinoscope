@@ -244,6 +244,16 @@ select { font: inherit; font-weight: 700; color: var(--ink); background: var(--w
 #view-seg button[aria-pressed="true"] { background: var(--rose); }
 /* pictogramme « accompagnant » (remplace le +1) */
 .acc-i { width: 1.15em; height: 1.15em; fill: currentColor; vertical-align: -0.2em; display: inline-block; }
+.is-public [data-admin] { display: none !important; }
+.unlock { position: fixed; inset: 0; z-index: 50; background: rgba(52, 82, 106, 0.35); display: grid; place-items: center; padding: 16px; }
+.unlock__box { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow-hover); padding: 24px; width: min(340px, 100%); display: grid; gap: 10px; }
+.unlock__box label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.12em; font-weight: 800; color: var(--ink-soft); }
+.unlock__box input { font: inherit; font-size: 1.1rem; padding: 10px 14px; border: 2px solid var(--blue-light); border-radius: 12px; color: var(--ink); letter-spacing: 0.08em; }
+.unlock__err { margin: 0; color: var(--rose); font-weight: 700; font-size: 0.86rem; }
+.unlock__btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
+.lock-out { margin-left: 10px; border: 0; background: var(--green-light); color: #2f5240; border-radius: 999px; padding: 2px 10px; font: inherit; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; }
+.pron { font-size: 0.72rem; font-weight: 700; color: var(--ink-soft); background: var(--cream); border-radius: 999px; padding: 1px 8px; margin-left: 4px; white-space: nowrap; }
+.drawer .pron { display: inline-block; margin: 4px 0 0; }
 .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 0.8rem; color: var(--ink-soft); font-weight: 700; align-items: center; }
 .legend .ev { width: 20px; height: 20px; font-size: 0.6rem; }
 .legend span { display: inline-flex; gap: 6px; align-items: center; }
@@ -398,7 +408,7 @@ svg text { font-family: var(--font-body); }
           <span class="lbl">Lien</span>
           <div class="toolbar__row" id="lien-chips"></div>
         </div>
-        <div class="toolbar__row">
+        <div class="toolbar__row" data-admin>
           <span class="lbl">Invité à</span>
           <div class="toolbar__row" id="ev-chips"></div>
         </div>
@@ -411,10 +421,10 @@ svg text { font-family: var(--font-body); }
               <option value="groupe">Bande / foyer</option>
               <option value="none">Aucun regroupement</option>
             </select>
-            <label class="toggle"><input type="checkbox" id="show-p1" checked> Afficher les <svg class="acc-i" role="img" aria-label="accompagnants"><use href="#acc-sym"/></svg> possibles</label>
+            <label class="toggle" data-admin><input type="checkbox" id="show-p1" checked> Afficher les <svg class="acc-i" role="img" aria-label="accompagnants"><use href="#acc-sym"/></svg> possibles</label>
             <label class="toggle"><input type="checkbox" id="show-age"> Afficher les âges</label>
-            <label class="lbl" for="reponse">Réponse</label>
-            <select id="reponse"><option value="">Toutes</option><option value="ok">Validé</option><option value="wait">En attente</option></select>
+            <label class="lbl" for="reponse" data-admin>Réponse</label>
+            <select id="reponse" data-admin><option value="">Toutes</option><option value="ok">Validé</option><option value="wait">En attente</option></select>
           </div>
           <span class="count" id="count"></span>
         </div>
@@ -425,16 +435,16 @@ svg text { font-family: var(--font-body); }
     <!-- ================= ARBRE ================= -->
     <section class="view" id="view-arbre" hidden>
 
-      <div class="arbre-filter" role="group" aria-label="Filtrer par invitation">
+      <div class="arbre-filter" data-admin role="group" aria-label="Filtrer par invitation">
         <span class="arbre-filter__lbl">Invité à</span>
         <div class="arbre-filter__seg" id="arbre-ev"></div>
         <span class="arbre-filter__count" id="arbre-count" hidden></span>
       </div>
 
-      <div class="panel">
+      <div class="panel" data-admin>
         <div class="panel__head">
           <h2>Arbre généalogique</h2>
-          <p>Famille d'Arthur à gauche (Carpentier puis Le Roc'h), famille de Mathilde à droite (Tauveron puis Viallon). Un clic sur une personne ouvre sa fiche.</p>
+          <p>Famille d'Arthur à gauche, famille de Mathilde à droite. Un clic sur une personne ouvre sa fiche.</p>
         </div>
         <div class="toolbar__row" style="margin-bottom: 10px;"><button class="chipbtn" id="tree-fit" aria-pressed="false">Vue d'ensemble</button><label class="toggle"><input type="checkbox" id="show-god" checked> Parrains et marraines</label></div>
         <div class="scroll-x" id="tree-scroll"><svg id="tree" style="height: auto; display: block;" role="img" aria-label="Arbre généalogique d'Arthur et Mathilde"></svg></div>
@@ -448,14 +458,14 @@ svg text { font-family: var(--font-body); }
       <div class="panel">
         <div class="panel__head">
           <h2>Diagramme de tous les invités</h2>
-          <p>Du couple vers chaque côté, puis par lien, puis par bande, foyer ou rôle familial.</p>
+          <p>Du couple vers chaque côté, puis par famille ou par bande d'amis.</p>
         </div>
         <div class="radial-legend">
           <span><i class="dot" style="background: var(--blue)"></i>Côté Arthur</span>
           <span><i class="dot" style="background: var(--rose)"></i>Côté Mathilde</span>
-          <span><i class="dot" style="background: var(--ink-soft)"></i>À préciser</span>
-          <span><i class="dot" style="background: var(--white); border: 1.5px solid var(--ink-soft)"></i>Accompagnant, relié à son invité par un trait</span>
-          <span><svg class="acc-i" style="color:var(--rose)" aria-hidden="true"><use href="#acc-sym"/></svg> après un nom : accompagnant possible, pas encore connu</span>
+          <span data-admin><i class="dot" style="background: var(--ink-soft)"></i>À préciser</span>
+          <span data-admin><i class="dot" style="background: var(--white); border: 1.5px solid var(--ink-soft)"></i>Accompagnant ou accompagnante, relié à son invité par un trait</span>
+          <span data-admin><svg class="acc-i" style="color:var(--rose)" aria-hidden="true"><use href="#acc-sym"/></svg> après un nom : accompagnant possible, pas encore connu</span>
         </div>
         <div class="scroll-x radial-wrap"><svg id="radial" style="min-width: 900px; width: 100%; max-width: 1180px; height: auto;" role="img" aria-label="Diagramme radial des invités"></svg></div>
       </div>
@@ -498,7 +508,27 @@ svg text { font-family: var(--font-body); }
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <script src="data/invites.js"></script>
 <script>
-const RAW = INVITES; // liste chargée depuis data/invites.js
+(async () => {
+// données : PUBLIC_DATA par défaut ; PRIVATE_DATA est chiffré
+const K = "tk";
+const lireK = () => { let k = ""; try { k = sessionStorage.getItem(K) || ""; } catch (e) {} if (!k && window.name.startsWith(K + ":")) k = window.name.slice(K.length + 1); return k; };
+const garderK = k => { try { sessionStorage.setItem(K, k); } catch (e) {} window.name = K + ":" + k; };
+const oublierK = () => { try { sessionStorage.removeItem(K); } catch (e) {} if (window.name.startsWith(K + ":")) window.name = ""; };
+const deB64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+const enB64 = b => btoa(String.fromCharCode(...new Uint8Array(b)));
+async function cleDepuis(saisie) {
+  const [sel] = PRIVATE_DATA.split(".").map(deB64);
+  const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(saisie), "PBKDF2", false, ["deriveKey"]);
+  return crypto.subtle.deriveKey({ name: "PBKDF2", salt: sel, iterations: 250000, hash: "SHA-256" }, base, { name: "AES-GCM", length: 256 }, true, ["decrypt"]);
+}
+async function ouvrir(cle) {
+  const [, iv, ct] = PRIVATE_DATA.split(".").map(deB64);
+  return JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({ name: "AES-GCM", iv }, cle, ct)));
+}
+let DATA = PUBLIC_DATA, PUBLIC = true;
+const kGarde = lireK();
+if (kGarde) { try { DATA = await ouvrir(await crypto.subtle.importKey("raw", deB64(kGarde), "AES-GCM", false, ["decrypt"])); PUBLIC = false; } catch (e) { oublierK(); } }
+const RAW = DATA.invites;
 
 /* ---------- Données ---------- */
 const ACC = `<svg class="acc-i" role="img" aria-label="accompagnant"><use href="#acc-sym"/></svg>`;
@@ -515,7 +545,7 @@ const EVENTS = [
   { k: "brunch", l: "Brunch", s: "B" },
 ];
 const LIENS = ["Famille proche", "Famille éloignée", "Amis", "Autre"];
-const LIEN_LABEL = { "Famille proche": "Famille proche", "Famille éloignée": "Famille éloignée", "Amis": "Amis", "Autre": "Autres", "": "À compléter" };
+const LIEN_LABEL = { "Famille proche": "Famille directe", "Famille éloignée": "Famille élargie", "Amis": "Amis", "Autre": "Autres", "": "À compléter" };
 
 const cap = s => s.toLowerCase().replace(/(^|[\s'-])(\p{L})/gu, (m, a, b) => a + b.toUpperCase());
 const guests = RAW.map(g => ({ ...g, nomAff: g.nom, todo: [] }));
@@ -542,77 +572,50 @@ const PLUS = {}; people.forEach(g => { if (g.plusOneOf) PLUS[g.plusOneOf] = g; }
 // règle : un +1 hérite des invitations (et du côté, du lien, de la bande) de la personne qu'il accompagne
 // evOverride : exception propre au +1 (ex. ne vient pas au repas)
 people.forEach(g => { const h = g.plusOneOf && byId[g.plusOneOf]; if (h) Object.assign(g, { ev: { ...h.ev, ...(g.evOverride || {}) }, cote: h.cote, lien: h.lien, groupe: h.groupe === "Travail" ? "" : h.groupe }); }); // un +1 ne fait pas partie de la bande Travail
-const openP1 = g => g.plus1 && !PLUS[g.id];
+const openP1 = g => !PUBLIC && g.plus1 && !PLUS[g.id];
 const hostOf = g => g.plusOneOf ? byId[g.plusOneOf] : null;
 const plusOnes = people.filter(openP1).map(g => ({ id: "p" + g.id, of: g.id, ghost: true }));
 
 /* ---------- Parenté (donnée par Arthur) ---------- */
 const find = (nom, prenom) => guests.find(g => g.nom === nom && g.prenom === prenom);
-const FEM = "Valentine Françoise Alizée Bertille Armande Eloïse Coraline Marion Elise Fanchon Fabienne Eliza Joséphine Adèle Lomane Typhenn Coraly Perrine Sophie Lisa Meline Daphnée Diane Appoline Janik Virginie Murielle Sarah Romane Charlyne Frédérique Marie-Alice Marjolaine Victoire Solange Valérie Carine Carole Marie Alice Elodie Julie Amélie Anne-Marie Danièle Evelyne Mathilde Blandine Mia".split(" ");
-const UNSURE = [];
-const gw = (p, m, f) => UNSURE.includes(p) ? `${m}(e)` : FEM.includes(p) ? f : m;
+const FEM = []; // repli si un pronom manque dans les données
+// accord selon le pronom de la personne (champ « pronom » : il ou elle) ; FEM ne sert que si le pronom manque
+const isElle = x => typeof x === "string" ? FEM.includes(x) : x && x.pronom ? x.pronom === "elle" : FEM.includes(x && x.prenom);
+const gw = (x, m, f) => isElle(x) ? f : m;
+const P = ref => find(...ref) || { prenom: ref[1] };
 /* Un seul arbre. U(personne, { sp: conjoint, kids: [...], dash: enfants supposés, spDash: conjoint supposé, center: parents d'un marié,
    kidsFrom: "p" si les enfants ne sont que de la personne, link: frère ou sœur déjà placé ailleurs dans l'arbre }) */
 const U = (p, o = {}) => ({ p, kids: [], ...o });
-const C_ = n => ["CARPENTIER", n], L_ = n => ["LEROC'H", n], T_ = n => ["TAUVERON", n], V_ = n => ["VIALLON", n];
-const TREE = [
-  { side: "Arthur", unit: U(["LESUEUR", "Evelyne"], { kids: [
-    U(C_("Thierry"), { kids: [U(C_("Lomane")), U(C_("Typhenn"))] }),
-    U(C_("Christophe"), { sp: C_("Sophie"), kids: [
-      U(C_("Guillaume"), { sp: C_("Blandine"), kids: [U(C_("Enzo")), U(C_("Mia"))] }),
-      U(C_("Coraly"), { sp: ["LEIDELKER", "Charlie"] }),
-      U(C_("Perrine")) ] }),
-    U(["HERRBACH", "Lisa"], { sp: ["HERRBACH", "Ludovic"], kids: ["Meline", "Daphnée", "Diane", "Appoline"].map(p => U(["HERRBACH", p])) }),
-    U(C_("Patrick"), { sp: C_("Janik"), center: true, kids: ["Elodie", "Julie", "Amélie", "Arthur"].map(p => U(C_(p))) }),
-  ] }) },
-  { side: "Arthur", unit: { label: "Fratrie Le Roc'h", link: C_("Janik"), kids: [
-    U(L_("Jean-Yves"), { sp: L_("Virginie"), kids: [U(L_("Sarah")), U(L_("Romane"))] }),
-    U(L_("Tristan"), { sp: L_("Murielle"), kids: [U(L_("Charlyne")), U(L_("Julien"))] }),
-  ] } },
-  { side: "Mathilde", unit: U(T_("Anne-Marie"), { kids: [
-    U(T_("Nicolas"), { sp: T_("Frédérique"), kids: ["Marjolaine", "Victoire", "Solange"].map(p => U(T_(p))) }),
-    U(T_("Matthias"), { sp: T_("Marie-Alice"), kids: [U(T_("Achille"))] }),
-    U(T_("Fabrice"), { sp: T_("Valérie"), center: true, kids: ["Mathilde", "Alice", "Raphaël"].map(p => U(T_(p))) }),
-  ] }) },
-  { side: "Mathilde", unit: U(V_("François"), { sp: ["CATHERINE", "Danièle"], kidsFrom: "p", link: T_("Valérie"), kids: [
-    U(["BENHYAYA", "Carine"], { sp: ["BENHYAYA", "Ahmed"], kids: ["Nassim", "Salim", "Naël"].map(p => U(["BENHYAYA", p])) }),
-    U(["LAVERDURE", "Carole"], { sp: ["LAVERDURE", "Michel"], kids: ["Hugo", "Mahé"].map(p => U(["LAVERDURE", p])) }),
-    U(V_("Fabrice"), { sp: V_("Marie") }),
-    U(V_("Florent"), { sp: V_("Françoise"), kids: [U(V_("Simon")), U(V_("Antonin")), U(V_("Elodie")), U(V_("Alizée")), U(["LYANT", "Bertille"])] }),
-  ] }) },
-  { side: "Mathilde", detached: "Famille belge", sub: "reliée par les parrainages", foyer: "Belges, Lemaitre et Vandermaes", extras: { row: 2, refs: [["LAMBERT", "Sébastien"], ["LAMBERT", "Nicolas"]] }, unit: U(["LEMAITRE", "André"], { sp: ["LEMAITRE", "Fabienne"], kids: [
-    U(["VANDERMAES", "Fanchon"], { sp: ["VANDERMAES", "Jérôme"], kids: ["Eliza", "Joséphine", "Adèle"].map(p => U(["VANDERMAES", p])) }),
-  ] }) },
-];
+const C_ = n => ["CARPENTIER", n], T_ = n => ["TAUVERON", n];
+const TREE = DATA.tree; // arbre de famille (dans les données ; la version publique ne contient que les personnes validées)
 /* liens de famille hors de l'arbre : visibles seulement dans les fiches */
-const FAMILLES_HORS_ARBRE = [
-  { parents: [["JEANTET", "Alexis"], ["JEANTET", "Valentine"]], enfants: [["JEANTET", "Anaé"]] },
-].map(f => ({ parents: f.parents.map(r => find(...r)).filter(Boolean), enfants: f.enfants.map(r => find(...r)).filter(Boolean) }));
-const ROLE = {}, CATG = {}, UNIT_FOYER = {}, IN_TREE = new Set();
-TREE.forEach(({ side, unit, detached, extras, foyer: dFoyer }) => {
+const FAMILLES_HORS_ARBRE = (DATA.horsArbre || []).map(f => ({ parents: f.parents.map(r => find(...r)).filter(Boolean), enfants: f.enfants.map(r => find(...r)).filter(Boolean) }));
+const ROLE = {}, CATG = {}, UNIT_FOYER = {}, IN_TREE = new Set(), FAM = {}; // FAM : grande famille du diagramme
+TREE.forEach(({ side, unit, detached, extras, foyer: dFoyer, fam }) => {
   if (extras) extras.refs.forEach(r => { const g = find(...r); if (g) IN_TREE.add(g.id); });
   if (detached) { // branche pas encore rattachée au reste de l'arbre
-    const mark = (u, parent) => [u.p, u.sp].filter(Boolean).forEach(r => { const g = find(...r); if (!g) return; IN_TREE.add(g.id); if (dFoyer) UNIT_FOYER[g.id] = dFoyer; if (parent && r === u.p) ROLE[g.id] = `${gw(r[1], "Fils", "Fille")} ${/^[AEIOUYÉÈ]/i.test(parent.p[1]) ? "d'" : "de "}${parent.p[1]} et ${parent.sp[1]}${parent.dash ? " ?" : ""}`; });
+    const mark = (u, parent) => [u.p, u.sp].filter(Boolean).forEach(r => { const g = find(...r); if (!g) return; IN_TREE.add(g.id); FAM[g.id] = fam; if (dFoyer) UNIT_FOYER[g.id] = dFoyer; if (parent && r === u.p) ROLE[g.id] = `${gw(P(r), "Fils", "Fille")} ${/^[AEIOUYÉÈ]/i.test(parent.p[1]) ? "d'" : "de "}${parent.p[1]} et ${parent.sp[1]}${parent.dash ? " ?" : ""}`; });
     const rec = (u, parent) => { mark(u, parent); u.kids.forEach(k => rec(k, u)); };
     rec(unit, null); return;
   }
   const suf = side === "Arthur" ? "d'Arthur" : "de Mathilde";
-  const set = (ref, r, cat, foyer) => { const g = ref && find(...ref); if (!g) return; IN_TREE.add(g.id); if (g.couple) return; ROLE[g.id] = r; if (cat) CATG[g.id] = cat; if (foyer) UNIT_FOYER[g.id] = foyer; };
+  const set = (ref, r, cat, foyer) => { const g = ref && find(...ref); if (!g) return; IN_TREE.add(g.id); if (g.couple) return; FAM[g.id] = cat === "Parents" || cat === "Frères et sœurs" ? "Famille directe" : fam; ROLE[g.id] = r; if (cat) CATG[g.id] = cat; if (foyer) UNIT_FOYER[g.id] = foyer; };
   const walk = (u, d, parent, foyer) => {
+    if (d > 0 && !u.p) { u.kids.forEach(k => walk(k, d + 1, u, foyer)); return; }
     const q = parent && parent.dash ? " ?" : "", pp = u.p && find(...u.p);
     if (d === 0 && u.p) {
-      set(u.p, `${gw(u.p[1], "Grand-père", "Grand-mère")} ${suf}`, "Grands-parents");
-      if (u.sp) set(u.sp, u.kidsFrom === "p" ? `${gw(u.sp[1], "Mari", "Femme")} de ${u.p[1]}` : `${gw(u.sp[1], "Grand-père", "Grand-mère")} ${suf}`, "Grands-parents");
+      set(u.p, `${gw(P(u.p), "Grand-père", "Grand-mère")} ${suf}`, "Grands-parents");
+      if (u.sp) set(u.sp, u.kidsFrom === "p" ? `${gw(P(u.sp), "Mari", "Femme")} de ${u.p[1]}` : `${gw(P(u.sp), "Grand-père", "Grand-mère")} ${suf}`, "Grands-parents");
     } else if (d === 1) {
       foyer = [u.p[1], u.sp && u.sp[1]].filter(Boolean).join(" et ") + " " + cap(u.p[0]);
-      if (u.center) { set(u.p, `${gw(u.p[1], "Père", "Mère")} ${suf}`, "Parents"); set(u.sp, `${gw(u.sp[1], "Père", "Mère")} ${suf}`, "Parents"); foyer = null; }
-      else { set(u.p, `${gw(u.p[1], "Oncle", "Tante")} ${suf}`, null, foyer); if (u.sp) set(u.sp, `${gw(u.sp[1], "Oncle", "Tante")} ${suf} (alliance)${u.spDash ? " ?" : ""}`, null, foyer); }
+      if (u.center) { set(u.p, `${gw(P(u.p), "Père", "Mère")} ${suf}`, "Parents"); set(u.sp, `${gw(P(u.sp), "Père", "Mère")} ${suf}`, "Parents"); foyer = null; }
+      else { set(u.p, `${gw(P(u.p), "Oncle", "Tante")} ${suf}`, null, foyer); if (u.sp) set(u.sp, `${gw(P(u.sp), "Oncle", "Tante")} ${suf} (alliance)${u.spDash ? " ?" : ""}`, null, foyer); }
     } else if (d === 2) {
-      if (parent.center) set(u.p, `${gw(u.p[1], "Frère", "Sœur")} ${suf}`, "Frères et sœurs");
-      else set(u.p, `${gw(u.p[1], "Cousin", "Cousine")} ${suf}${q}`, null, foyer);
-      if (u.sp) set(u.sp, `${gw(u.sp[1], "Mari", "Femme")} de ${u.p[1]}`, null, foyer);
+      if (parent.center) set(u.p, `${gw(P(u.p), "Frère", "Sœur")} ${suf}`, "Frères et sœurs");
+      else set(u.p, `${gw(P(u.p), "Cousin", "Cousine")} ${suf}${q}`, null, foyer);
+      if (u.sp) set(u.sp, `${gw(P(u.sp), "Mari", "Femme")} de ${u.p[1]}`, null, foyer);
     } else if (d === 3) {
-      set(u.p, `${gw(u.p[1], "Fils", "Fille")} de ${parent.p[1]}`, null, foyer);
+      set(u.p, `${gw(P(u.p), "Fils", "Fille")} de ${parent.p[1]}`, null, foyer);
     }
     u.kids.forEach(k => walk(k, d + 1, u, foyer));
   };
@@ -626,15 +629,12 @@ people.forEach(g => {
 });
 /* sous-catégorie affichée : rôle familial, foyer ou bande */
 /* parrainages et témoins */
-const GODLINKS = [
-  [["VANDERMAES", "Fanchon"], T_("Mathilde")], [T_("Mathilde"), ["VANDERMAES", "Eliza"]], [T_("Valérie"), ["VANDERMAES", "Fanchon"]],
-  [["LEMAITRE", "Fabienne"], T_("Valérie")], [["HERRBACH", "Lisa"], C_("Arthur")], [C_("Thierry"), C_("Arthur")], [["LAMBERT", "Sébastien"], ["VANDERMAES", "Eliza"]], [["LAMBERT", "Nicolas"], ["VANDERMAES", "Eliza"]],
-].map(([a, b]) => ({ from: find(...a), to: find(...b) })).filter(l => l.from && l.to);
-const TEMOINS = { Arthur: [["LESNARD", "Eliot"], ["JAOUEN", "Elise"]], Mathilde: [["VERDIER", "Armande"], ["GANNIER", "Eloïse"], ["AUVRAY", "Coraline"], ["BLANCHARD", "Marion"]] };
+const GODLINKS = (DATA.godlinks || []).map(([a, b]) => ({ from: find(...a), to: find(...b) })).filter(l => l.from && l.to);
+const TEMOINS = DATA.temoins || {};
 const EXTRA = {}, TEMOIN_OF = {};
 const addX = (g, txt) => (EXTRA[g.id] = EXTRA[g.id] || []).push(txt);
 const deOf = g => /^[AEIOUYÉÈ]/i.test(g.prenom) ? `d'${g.prenom}` : `de ${g.prenom}`;
-GODLINKS.forEach(({ from, to }) => { addX(from, `${gw(from.prenom, "Parrain", "Marraine")} ${deOf(to)}`); addX(to, `${gw(to.prenom, "Filleul", "Filleule")} ${deOf(from)}`); });
+GODLINKS.forEach(({ from, to }) => { addX(from, `${gw(from, "Parrain", "Marraine")} ${deOf(to)}`); addX(to, `${gw(to, "Filleul", "Filleule")} ${deOf(from)}`); });
 Object.entries(TEMOINS).forEach(([who, refs]) => refs.forEach(r => { const g = find(...r); if (g) { TEMOIN_OF[g.id] = who; addX(g, `Témoin ${who === "Arthur" ? "d'Arthur" : "de Mathilde"}`); } }));
 const sub = g => g.lien === "Famille proche" ? (CATG[g.id] || g.groupe || cap(g.nom)) : g.lien === "Famille éloignée" ? g.foyer : g.groupe;
 
@@ -657,6 +657,7 @@ function renderStats() {
   const total = guests.length;
   const p1 = plusOnes.length;
   const ok = guests.filter(g => g.valide).length;
+  if (PUBLIC) { document.getElementById("stats").innerHTML = `<div class="stat"><span class="stat__n">${total}</span><span class="stat__l">invités ont confirmé</span><span class="stat__p">&nbsp;</span></div>`; return; }
   const html = [`<div class="stat"><span class="stat__n">${total + p1}</span><span class="stat__l">invités</span><span class="stat__p">dont ${p1} ${ACC} à valider</span></div>`,
     `<div class="stat"><span class="stat__n" style="color:var(--green)">${ok}</span><span class="stat__l">ont validé</span><span class="stat__p" style="color:var(--ink-soft)">${total - ok} en attente</span></div>`];
   EVENTS.forEach(e => {
@@ -686,18 +687,18 @@ const linkIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" str
 const checkIcon = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>`;
 function card(g) {
   return `<article class="card${g.valide ? "" : " card--wait"}" data-side="${g.cote}" data-id="${g.id}" tabindex="0" aria-label="${fullName(g)}${g.valide ? ", a validé" : ", en attente de réponse"}"${g.valide ? "" : ` title="En attente de réponse"`}>
-    ${openP1(g) ? `<span class="card__plus1" title="Peut venir accompagné" role="img" aria-label="Peut venir accompagné">${ACC}</span>` : ""}
+    ${openP1(g) ? `<span class="card__plus1" title="Peut venir ${gw(g, "accompagné", "accompagnée")}" role="img" aria-label="Peut venir ${gw(g, "accompagné", "accompagnée")}">${ACC}</span>` : ""}
     ${avatar(g)}
     <div class="card__name">${g.prenom.replace(" ?", "") || "?"}<span class="card__nom">${g.nom || ""}</span></div>
-    ${state.ages ? `<span class="card__age${ageOf(g) === null ? " card__age--todo" : ""}" title="${g.naissance ? "Né(e) le " + dateFr(g.naissance) : "Date de naissance à renseigner"}">${ageTxt(g)}</span>` : ""}
+    ${state.ages ? `<span class="card__age${ageOf(g) === null ? " card__age--todo" : ""}" title="${g.naissance ? gw(g, "Né le ", "Née le ") + dateFr(g.naissance) : "Date de naissance à renseigner"}">${ageTxt(g)}</span>` : ""}
     ${tags(g)}
     ${hostOf(g) ? `<span class="link-hint">${ACC} accompagne ${hostOf(g).prenom}</span>` : ""}
   </article>`;
 }
 function ghostCard(g) {
-  return `<article class="card card--ghost${g.valide ? "" : " card--wait"}" data-side="${g.cote}" aria-label="Accompagnant possible de ${fullName(g)}">
+  return `<article class="card card--ghost${g.valide ? "" : " card--wait"}" data-side="${g.cote}" aria-label="Accompagnement possible pour ${fullName(g)}">
     <span class="avatar avatar--ghost">${ACC}</span>
-    <div class="card__name">Accompagnant<span class="card__nom">à confirmer</span></div>
+    <div class="card__name">Accompagnement<span class="card__nom">à confirmer</span></div>
     <span class="link-hint">${linkIcon} accompagne ${g.prenom}</span>
   </article>`;
 }
@@ -706,9 +707,9 @@ function ghostCard(g) {
 const COLS = [
   { k: "nom", l: "Invité" }, { k: "cote", l: "Côté" }, { k: "lien", l: "Lien" }, { k: "sub", l: "Bande, foyer" },
   ...EVENTS.map(e => ({ k: "ev:" + e.k, l: `<span role="img" aria-label="${e.l}">${EV_EMOJI[e.k]}</span>`, title: e.l, ev: true })),
-  { k: "p1", l: `<svg class="acc-i" role="img" aria-label="Accompagnant"><use href="#acc-sym"/></svg>`, title: "Accompagnant" }, { k: "rep", l: "Réponse", ev: true }, { k: "age", l: "Âge", opt: "ages" },
+  { k: "rep", l: "Réponse", ev: true }, { k: "age", l: "Âge", opt: "ages" },
 ];
-const cols = () => COLS.filter(c => !c.opt || state[c.opt]); // l'âge suit la case « Afficher les âges »
+const cols = () => COLS.filter(c => (!c.opt || state[c.opt]) && !(PUBLIC && c.ev)); // l'âge suit la case « Afficher les âges »
 const sortVal = (g, k) => k === "nom" ? `${g.nom} ${g.prenom}` : k === "cote" ? g.cote : k === "lien" ? (ROLE[g.id] || g.lien) : k === "sub" ? (sub(g) || "")
   : k.startsWith("ev:") ? (g.ev[k.slice(3)] ? 0 : 1) : k === "p1" ? (PLUS[g.id] ? 0 : openP1(g) ? 1 : 2) : k === "rep" ? (g.valide ? 0 : 1)
   : k === "age" ? (() => { const a = ageOf(g); return a === null ? 999 : Array.isArray(a) ? a[0] : a; })() : "";
@@ -718,22 +719,19 @@ function sortRows(arr) {
 }
 const yes = `<span class="tcheck" title="Invité">${checkIcon}</span>`, no = `<span class="tno" aria-label="Non">·</span>`;
 function row(g, host) {
-  const p1 = PLUS[g.id] ? `<button class="tlink" data-id="${PLUS[g.id].id}">${PLUS[g.id].prenom}</button>` : openP1(g) ? `<span class="tmuted">possible</span>` : "";
   return `<tr class="${g.valide ? "" : "is-wait"}${host ? " trow--plus" : ""}" data-id="${g.id}" tabindex="0">
-    <th scope="row" class="tperson">${host ? `<span class="tplus" aria-hidden="true">↳</span>` : ""}${avatar(g)}<span><b>${g.prenom}</b> ${g.nom}${host ? `<small>accompagne ${host.prenom}</small>` : ""}</span></th>
+    <th scope="row" class="tperson">${host ? `<span class="tplus" aria-hidden="true">↳</span>` : ""}${avatar(g)}<span><b>${g.prenom}</b> ${g.nom} <span class="pron">${g.pronom || ""}</span>${host ? `<small>accompagne ${host.prenom}</small>` : ""}</span></th>
     <td>${g.cote ? `<span class="tag tag--side-${g.cote}">${g.cote}</span>` : ""}</td>
     <td>${ROLE[g.id] || (g.lien && g.lien !== "Autre" ? LIEN_LABEL[g.lien] : "")}${(EXTRA[g.id] || []).filter(x => /^Témoin/.test(x) || /(d'Arthur|de Mathilde)$/.test(x)).map(x => `<span class="tag tag--special">${x}</span>`).join("")}</td>
     <td>${ROLE[g.id] ? "" : (sub(g) || "")}</td>
-    ${EVENTS.map(e => `<td class="tev">${g.ev[e.k] ? yes : no}</td>`).join("")}
-    <td>${p1}</td>
-    <td class="tev">${repIcon(g)}</td>
+    ${PUBLIC ? "" : EVENTS.map(e => `<td class="tev">${g.ev[e.k] ? yes : no}</td>`).join("") + `<td class="tev">${repIcon(g)}</td>`}
     ${state.ages ? `<td class="tnum">${ageOf(g) === null ? `<span class="tmuted">?</span>` : ageTxt(g)}</td>` : ""}
   </tr>`;
 }
 function ghostRow(g) {
   return `<tr class="trow--plus trow--ghost${g.valide ? "" : " is-wait"}">
-    <th scope="row" class="tperson"><span class="tplus" aria-hidden="true">↳</span><span class="avatar avatar--ghost">${ACC}</span><span><b>Accompagnant</b> à confirmer<small>accompagne ${g.prenom}</small></span></th>
-    <td></td><td></td><td></td>${EVENTS.map(e => `<td class="tev">${g.ev[e.k] ? yes : no}</td>`).join("")}<td></td><td></td>${state.ages ? "<td></td>" : ""}
+    <th scope="row" class="tperson"><span class="tplus" aria-hidden="true">↳</span><span class="avatar avatar--ghost">${ACC}</span><span><b>Accompagnement</b> à confirmer<small>accompagne ${g.prenom}</small></span></th>
+    <td></td><td></td><td></td>${EVENTS.map(e => `<td class="tev">${g.ev[e.k] ? yes : no}</td>`).join("")}<td></td>${state.ages ? "<td></td>" : ""}
   </tr>`;
 }
 const tableWrap = rows => `<div class="tablewrap"><table class="gtable">
@@ -746,7 +744,7 @@ try { const s = JSON.parse(localStorage.getItem("trombi-state") || "{}"); if (s.
 const saveState = () => { try { localStorage.setItem("trombi-state", JSON.stringify({ groupby: state.groupby, view: state.view })); } catch (err) {} };
 
 function buildFilters() {
-  document.getElementById("lien-chips").innerHTML = LIENS.map(l => `<button class="chipbtn" data-lien="${l}" aria-pressed="false">${LIEN_LABEL[l]}</button>`).join("");
+  document.getElementById("lien-chips").innerHTML = LIENS.filter(l => people.some(g => g.lien === l)).map(l => `<button class="chipbtn" data-lien="${l}" aria-pressed="false">${LIEN_LABEL[l]}</button>`).join("");
   document.getElementById("ev-chips").innerHTML = EVENTS.map(e => `<button class="chipbtn" data-kind="event" data-ev="${e.k}" aria-pressed="false">${e.l}</button>`).join("");
   document.getElementById("groupby").value = state.groupby;
 }
@@ -842,18 +840,18 @@ function openDrawer(id) {
   const d = document.getElementById("drawer");
   d.innerHTML = `
     <button class="drawer__close" id="d-close">Fermer</button>
-    <div class="drawer__id">${avatar(g)}<div><h2 id="d-name">${fullName(g)}</h2>
+    <div class="drawer__id">${avatar(g)}<div><h2 id="d-name">${fullName(g)}</h2><span class="pron">${g.pronom || ""}</span>
       <div class="card__tags" style="justify-content:flex-start;margin-top:6px">
         ${g.cote ? `<span class="tag tag--side-${g.cote}">Côté ${g.cote}</span>` : `<span class="tag tag--todo">Côté à préciser</span>`}
         ${ROLE[g.id] ? `<span class="tag tag--lien">${ROLE[g.id]}</span>` : g.lien && g.lien !== "Autre" ? `<span class="tag tag--lien">${LIEN_LABEL[g.lien] || g.lien}</span>` : ""}
         ${(EXTRA[g.id] || []).map(x => `<span class="tag tag--special">${x}</span>`).join("")}
         ${sub(g) && !g.couple && !ROLE[g.id] ? `<span class="tag tag--groupe">${sub(g)}</span>` : ""}
       </div></div></div>
-    <div><h3>Réponse à l'invitation</h3><span class="ok-pill${g.valide ? "" : " ok-pill--wait"}">${repIcon(g, true)}${g.valide ? "Validé" : "En attente de réponse"}</span></div>
-    <div><h3>Âge</h3><p style="margin:0;font-size:.95rem;font-weight:700">${g.naissance ? `${ageTxt(g)}, ${gw(g.prenom, "né", "née")} le ${dateFr(g.naissance)}${g.naissance.includes("X") ? `<br><span style="color:var(--ink-soft);font-weight:600;font-size:.85rem">Année incomplète : l'âge est donné en fourchette.</span>` : ""}` : `<span style="color:var(--ink-soft);font-weight:600">Date de naissance à renseigner. L'âge sera calculé automatiquement à la date du jour.</span>`}</p></div>
+    ${PUBLIC ? "" : `<div><h3>Réponse à l'invitation</h3><span class="ok-pill${g.valide ? "" : " ok-pill--wait"}">${repIcon(g, true)}${g.valide ? "Validé" : "En attente de réponse"}</span></div>`}
+    <div><h3>Âge</h3><p style="margin:0;font-size:.95rem;font-weight:700">${g.naissance ? `${ageTxt(g)}, ${gw(g, "né", "née")} le ${dateFr(g.naissance)}${g.naissance.includes("X") ? `<br><span style="color:var(--ink-soft);font-weight:600;font-size:.85rem">Année incomplète : l'âge est donné en fourchette.</span>` : ""}` : `<span style="color:var(--ink-soft);font-weight:600">Date de naissance à renseigner. L'âge sera calculé automatiquement à la date du jour.</span>`}</p></div>
     ${g.photo ? "" : `<div class="photo-drop">Pas encore de photo : les initiales s'affichent à la place.</div>`}
     ${(() => {
-      const ln = [...GODLINKS.filter(l => l.to === g).map(l => [gw(l.from.prenom, "Parrain", "Marraine"), l.from]), ...GODLINKS.filter(l => l.from === g).map(l => [gw(l.to.prenom, "Filleul", "Filleule"), l.to])];
+      const ln = [...GODLINKS.filter(l => l.to === g).map(l => [gw(l.from, "Parrain", "Marraine"), l.from]), ...GODLINKS.filter(l => l.from === g).map(l => [gw(l.to, "Filleul", "Filleule"), l.to])];
       const tem = g.couple ? people.filter(x => TEMOIN_OF[x.id] === g.cote).map(x => ["Témoin", x]) : [];
       const all = [...ln, ...tem];
       return all.length ? `<div><h3>Parrainage et témoins</h3><div class="mini">${all.map(([l, x]) => `<button data-id="${x.id}">${avatar(x)}<span><small style="color:var(--green);font-weight:800">${l}</small> ${fullName(x)}</span></button>`).join("")}</div></div>` : "";
@@ -861,16 +859,16 @@ function openDrawer(id) {
     ${(() => {
       const f = FAMILLES_HORS_ARBRE.find(f => f.parents.includes(g) || f.enfants.includes(g)); if (!f) return "";
       const rows = f.enfants.includes(g)
-        ? [["Parents", f.parents], [gw(g.prenom, "Frères et sœurs", "Frères et sœurs"), f.enfants.filter(x => x !== g)]]
-        : [[gw(g.prenom, "Femme", "Mari"), f.parents.filter(x => x !== g)], ["Enfants", f.enfants]];
-      return `<div><h3>Famille</h3>${rows.filter(r => r[1].length).map(([l, arr]) => `<div class="mini" style="margin-bottom:6px">${arr.map(x => `<button data-id="${x.id}">${avatar(x)}<span><small style="color:var(--green);font-weight:800">${arr.length > 1 || l === "Parents" || l === "Enfants" ? l.replace(/s$/, "").replace("Frères et sœur", gw(x.prenom, "Frère", "Sœur")).replace("Parent", gw(x.prenom, "Père", "Mère")).replace("Enfant", gw(x.prenom, "Fils", "Fille")) : l}</small> ${fullName(x)}</span></button>`).join("")}</div>`).join("")}</div>`;
+        ? [["Parents", f.parents], [gw(g, "Frères et sœurs", "Frères et sœurs"), f.enfants.filter(x => x !== g)]]
+        : [[gw(g, "Femme", "Mari"), f.parents.filter(x => x !== g)], ["Enfants", f.enfants]];
+      return `<div><h3>Famille</h3>${rows.filter(r => r[1].length).map(([l, arr]) => `<div class="mini" style="margin-bottom:6px">${arr.map(x => `<button data-id="${x.id}">${avatar(x)}<span><small style="color:var(--green);font-weight:800">${arr.length > 1 || l === "Parents" || l === "Enfants" ? l.replace(/s$/, "").replace("Frères et sœur", gw(x, "Frère", "Sœur")).replace("Parent", gw(x, "Père", "Mère")).replace("Enfant", gw(x, "Fils", "Fille")) : l}</small> ${fullName(x)}</span></button>`).join("")}</div>`).join("")}</div>`;
     })()}
-    <div><h3>Invitations</h3><div class="evlist">${EVENTS.map(e => `<div><span>${e.l}</span><span class="${g.ev[e.k] ? "yes" : "no"}">${g.ev[e.k] ? "Oui" : "Non"}</span></div>`).join("")}</div></div>
-    ${PLUS[g.id] ? `<div><h3>Accompagnant</h3><div class="mini"><button data-id="${PLUS[g.id].id}">${avatar(PLUS[g.id])}${fullName(PLUS[g.id])}</button></div></div>` : ""}
+    ${PUBLIC ? "" : `<div><h3>Invitations</h3><div class="evlist">${EVENTS.map(e => `<div><span>${e.l}</span><span class="${g.ev[e.k] ? "yes" : "no"}">${g.ev[e.k] ? "Oui" : "Non"}</span></div>`).join("")}</div></div>`}
+    ${PLUS[g.id] ? `<div><h3>${gw(PLUS[g.id], "Accompagnant", "Accompagnante")}</h3><div class="mini"><button data-id="${PLUS[g.id].id}">${avatar(PLUS[g.id])}${fullName(PLUS[g.id])}</button></div></div>` : ""}
     ${hostOf(g) ? `<div><h3>Accompagne</h3><div class="mini"><button data-id="${hostOf(g).id}">${avatar(hostOf(g))}${fullName(hostOf(g))}</button></div></div>` : ""}
-    ${openP1(g) ? `<div><h3>Accompagnant</h3><div class="mini"><button disabled style="cursor:default"><span class="avatar avatar--ghost">${ACC}</span>Nom à confirmer</button></div><p style="font-size:.82rem;color:var(--ink-soft);margin:6px 0 0">Une fois le nom connu, l'accompagnant devient un invité à part entière, relié à ${g.prenom}.</p></div>` : ""}
+    ${openP1(g) ? `<div><h3>Accompagnement</h3><div class="mini"><button disabled style="cursor:default"><span class="avatar avatar--ghost">${ACC}</span>Nom à confirmer</button></div><p style="font-size:.82rem;color:var(--ink-soft);margin:6px 0 0">Une fois le nom connu, l'accompagnant devient un invité à part entière, relié à ${g.prenom}.</p></div>` : ""}
     ${sameGroup.length ? `<div><h3>Même bande : ${g.groupe}</h3>${mini(sameGroup)}</div>` : ""}
-    ${sameFam.length ? `<div><h3>${g.lien === "Famille éloignée" ? "Même foyer : " + g.foyer : "Famille proche côté " + g.cote}</h3>${mini(sameFam)}</div>` : ""}
+    ${sameFam.length ? `<div><h3>${g.lien === "Famille éloignée" ? "Même foyer : " + g.foyer : "Famille directe côté " + g.cote}</h3>${mini(sameFam)}</div>` : ""}
 `;
   d.hidden = false; document.getElementById("drawer-bg").hidden = false;
   document.getElementById("d-close").focus();
@@ -937,7 +935,7 @@ function renderTree() {
   // parrains et marraines : arcs verts au-dessus des nœuds
   const seenLbl = {};
   s += `<g id="godlinks">` + GODLINKS.map(({ from, to }) => {
-    const role = gw(from.prenom, "parrain", "marraine"), same = GODLINKS.filter(l => l.to === to && gw(l.from.prenom, "parrain", "marraine") === role).length;
+    const role = gw(from, "parrain", "marraine"), same = GODLINKS.filter(l => l.to === to && gw(l.from, "parrain", "marraine") === role).length;
     const lbl = `${same > 1 ? role + "s" : role} ${deOf(to)}`, showLbl = !seenLbl[lbl]; seenLbl[lbl] = true;
     const pa = Object.entries(pos).find(([k]) => find(...k.split("|")) === from), pb = Object.entries(pos).find(([k]) => find(...k.split("|")) === to);
     if (!pa || !pb) return "";
@@ -988,7 +986,7 @@ function renderLoose(side) {
   const rest = people.filter(g => g.cote === side && !IN_TREE.has(g.id) && !g.plusOneOf)
     .sort((a, b) => (!!TEMOIN_OF[b.id] - !!TEMOIN_OF[a.id]) || (!a.nom - !b.nom) || (a.nom || "").localeCompare(b.nom || "") || a.prenom.localeCompare(b.prenom));
   const pill = g => PLUS[g.id] ? `<span class="p1pill${PLUS[g.id].valide || !g.valide ? "" : " is-wait"}" data-id="${PLUS[g.id].id}" data-side="${PLUS[g.id].cote}" title="Accompagnant : ${fullName(PLUS[g.id])}">${initials(PLUS[g.id])}</span>`
-    : openP1(g) ? `<span class="p1pill p1pill--open" title="Accompagnant à confirmer">${ACC}</span>` : "";
+    : openP1(g) ? `<span class="p1pill p1pill--open" title="Accompagnement à confirmer">${ACC}</span>` : "";
   const node = g => `<button class="lnode${TEMOIN_OF[g.id] ? " lnode--temoin" : ""}${g.valide ? "" : " is-wait"}" data-id="${g.id}"${TEMOIN_OF[g.id] ? ` data-of="${TEMOIN_OF[g.id]}"` : ""}><span class="lwrap">${avatar(g)}${pill(g)}</span><b>${g.prenom.replace(" ?", "") || "?"}</b><small>${g.nom || ""}${PLUS[g.id] ? `<br>${ACC} ${PLUS[g.id].prenom}` : ""}</small>${TEMOIN_OF[g.id] ? `<span class="temoin-badge">Témoin</span>` : ""}</button>`;
   document.getElementById("loose-" + (side || "none")).innerHTML = rest.length ? `<div class="loose__people">${rest.map(node).join("")}</div>` : "";
   if (!side) document.getElementById("none-col").hidden = !rest.length;
@@ -1003,24 +1001,38 @@ function renderRadial() {
   const root = { name: "Arthur & Mathilde", key: "root", children: [] };
   ["Arthur", "Mathilde", ""].forEach(side => {
     const sideNode = { name: side ? "Côté " + side : "À préciser", key: "s:" + side, side, children: [] };
-    [...LIENS, ""].forEach(l => {
-      const arr = people.filter(g => g.cote === side && g.lien === l && arbreMatch(g));
-      if (!arr.length) return;
-      const ln = { name: LIEN_LABEL[l], key: `l:${side}:${l}`, side, children: [] };
+    // chaque +1 renseigné est placé juste après la personne qu'il accompagne
+    const leavesOf = gs => gs.filter(g => !(hostOf(g) && gs.includes(hostOf(g)))).flatMap(g => PLUS[g.id] && gs.includes(PLUS[g.id]) ? [g, PLUS[g.id]] : [g])
+      .map(g => ({ name: fullName(g) || g.prenom, key: "p:" + g.id, side, id: g.id, p1: openP1(g), host: g.plusOneOf || null, wait: !g.valide }));
+    const pushGroups = (node, gs, keyOf, labelled) => {
       const subs = new Map();
-      // une bande d'une seule personne rejoint les invités sans bande
-      // un +1 est placé dans la branche de la personne qu'il accompagne, pour rester à côté d'elle
-      const keyOfR = g => sub(hostOf(g) || g) || "";
-      const cnt = {}; arr.forEach(g => { const k = keyOfR(g); cnt[k] = (cnt[k] || 0) + 1; });
-      arr.forEach(g => { let k = keyOfR(g); if (cnt[k] < 2) k = ""; if (!subs.has(k)) subs.set(k, []); subs.get(k).push(g); });
-      [...subs.entries()].forEach(([k, gs]) => {
-        // chaque +1 renseigné est placé juste après la personne qu'il accompagne
-        const ordered = gs.filter(g => !(hostOf(g) && gs.includes(hostOf(g)))).flatMap(g => PLUS[g.id] && gs.includes(PLUS[g.id]) ? [g, PLUS[g.id]] : [g]);
-        const leaves = ordered.map(g => ({ name: fullName(g) || g.prenom, key: "p:" + g.id, side, id: g.id, p1: openP1(g), host: g.plusOneOf || null, wait: !g.valide }));
-        if (k && gs.length > 1) ln.children.push({ name: k, key: `g:${side}:${l}:${k}`, side, children: leaves });
-        else ln.children.push(...leaves);
+      // un +1 suit la personne qu'il accompagne ; un groupe d'une seule personne rejoint les invités sans groupe
+      const k0 = g => keyOf(hostOf(g) || g) || "";
+      const cnt = {}; gs.forEach(g => { const k = k0(g); cnt[k] = (cnt[k] || 0) + 1; });
+      gs.forEach(g => { let k = k0(g); if (cnt[k] < 2) k = ""; if (!subs.has(k)) subs.set(k, []); subs.get(k).push(g); });
+      [...subs.entries()].forEach(([k, arr]) => {
+        if (k && arr.length > 1) node.children.push({ name: labelled ? k : "", key: `${node.key}:${k}`, side, children: leavesOf(arr) });
+        else node.children.push(...leavesOf(arr));
       });
-      sideNode.children.push(ln);
+    };
+    // familles : famille directe, puis une grande branche par famille (champ « fam » de l'arbre)
+    const fam = people.filter(g => g.cote === side && g.lien.startsWith("Famille") && arbreMatch(g));
+    const famOf = g => FAM[(hostOf(g) || g).id] || (hostOf(g) || g).foyer || "Famille";
+    const famOrder = ["Famille directe", ...TREE.filter(t => t.side === side).map(t => t.fam)];
+    [...new Set([...famOrder, ...fam.map(famOf)])].forEach(fn => {
+      const gs = fam.filter(g => famOf(g) === fn); if (!gs.length) return;
+      const node = { name: fn, key: `f:${side}:${fn}`, side, children: [] };
+      // famille directe : parents / frères et sœurs nommés ; autres familles : foyers regroupés sans nom de couple
+      if (fn === "Famille directe") pushGroups(node, gs, g => CATG[g.id], true);
+      else pushGroups(node, gs, g => UNIT_FOYER[g.id], false);
+      sideNode.children.push(node);
+    });
+    // amis et autres : par bande
+    LIENS.filter(l => !l.startsWith("Famille")).concat([""]).forEach(l => {
+      const gs = people.filter(g => g.cote === side && g.lien === l && arbreMatch(g)); if (!gs.length) return;
+      const node = { name: LIEN_LABEL[l], key: `l:${side}:${l}`, side, children: [] };
+      pushGroups(node, gs, g => sub(g), true);
+      sideNode.children.push(node);
     });
     if (sideNode.children.length) root.children.push(sideNode);
   });
@@ -1087,7 +1099,7 @@ function renderRadial() {
       return t => rot(i(t).x, i(t).y);
     });
   // libellés des branches, posés à plat pour rester lisibles
-  svg.select("g.r-labels").selectAll("text").data(h.descendants().filter(d => d.children && d.depth > 0), d => d.data.key)
+  svg.select("g.r-labels").selectAll("text").data(h.descendants().filter(d => d.children && d.depth > 0 && d.data.name), d => d.data.key)
     .join(
       enter => enter.append("text").attr("dy", "-0.6em").attr("text-anchor", "middle").attr("opacity", 0)
         .attr("font-size", d => d.depth === 1 ? 14 : d.depth === 2 ? 11.5 : 10).attr("font-weight", 800).attr("fill", d => color(d.data.side))
@@ -1156,8 +1168,36 @@ function show(v) {
 document.querySelector(".tabs").addEventListener("click", e => { const b = e.target.closest(".tab"); if (b) { location.hash = b.dataset.view; show(b.dataset.view); } });
 window.addEventListener("hashchange", () => show(location.hash.slice(1)));
 
-renderStats(); buildFilters(); wireTrombi(); renderTrombi(); renderTrees(); renderTables();
-show(location.hash.slice(1));
+if (PUBLIC) { document.body.classList.add("is-public"); state.p1 = false; document.getElementById("tab-arbre").textContent = "Diagramme"; }
+renderStats(); buildFilters(); wireTrombi(); renderTrombi(); if (!PUBLIC) renderTrees(); renderTables();
+
+{
+  const av = s => document.querySelector(`.couple .avatar[data-side="${s}"]`);
+  let t0 = 0;
+  av("Mathilde").addEventListener("click", () => { t0 = Date.now(); });
+  av("Arthur").addEventListener("click", () => {
+    if (!PUBLIC || Date.now() - t0 > 5000) return;
+    t0 = 0;
+    const d = document.createElement("div");
+    d.className = "unlock"; d.setAttribute("role", "dialog"); d.setAttribute("aria-modal", "true");
+    d.innerHTML = `<form class="unlock__box" autocomplete="off"><label for="u-c">Code</label><input id="u-c" type="password"><p class="unlock__err" hidden>Code incorrect.</p><div class="unlock__btns"><button type="button" class="btn btn--ghost">Annuler</button><button type="submit" class="btn btn--primary">Entrer</button></div></form>`;
+    document.body.append(d);
+    const f = d.querySelector("form"), inp = d.querySelector("input"), err = d.querySelector(".unlock__err"), ok = d.querySelector('[type="submit"]');
+    d.querySelector('[type="button"]').addEventListener("click", () => d.remove());
+    f.addEventListener("submit", async e => {
+      e.preventDefault(); ok.disabled = true; ok.textContent = "…";
+      try { const cle = await cleDepuis(inp.value); await ouvrir(cle); garderK(enB64(await crypto.subtle.exportKey("raw", cle))); location.reload(); }
+      catch (x) { err.hidden = false; ok.disabled = false; ok.textContent = "Entrer"; }
+    });
+    inp.focus();
+  });
+  if (!PUBLIC) {
+    const q = document.createElement("button"); q.className = "lock-out"; q.textContent = "Quitter";
+    document.querySelector(".hero__kicker").append(q);
+    q.addEventListener("click", () => { oublierK(); location.reload(); });
+  }
+}
+})();
 </script>
 </body>
 </html>
