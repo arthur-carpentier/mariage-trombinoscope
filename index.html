@@ -979,7 +979,7 @@ function renderTree() {
     const pt = PLUS[g.id];
     if (pt) {
       const pc = pt.cote === "Arthur" ? "#3A6E8C" : "#B05078";
-      s += `<g class="tree-node${pt.valide || !g.valide ? "" : " is-wait"}" data-id="${pt.id}" role="button" aria-label="${fullName(pt)}, accompagne ${g.prenom}"><circle cx="${p.x + r * 0.8}" cy="${p.y + r * 0.7}" r="11" fill="${pc}" stroke="#FFFFFF" stroke-width="2"/><text x="${p.x + r * 0.8}" y="${p.y + r * 0.7 + 3.5}" text-anchor="middle" font-size="8.5" font-weight="800" fill="#FFFFFF">${initials(pt)}</text></g>`;
+      s += `<g class="tree-node${pt.valide || !g.valide ? "" : " is-wait"}" data-id="${pt.id}" role="button" aria-label="${fullName(pt)}, accompagne ${g.prenom}"><circle cx="${p.x + r * 0.8}" cy="${p.y + r * 0.7}" r="11" fill="${pc}" stroke="#FFFFFF" stroke-width="2"/>${pt.photo ? photoRond(pt, p.x + r * 0.8, p.y + r * 0.7, 10) : `<text x="${p.x + r * 0.8}" y="${p.y + r * 0.7 + 3.5}" text-anchor="middle" font-size="8.5" font-weight="800" fill="#FFFFFF">${initials(pt)}</text>`}</g>`;
     }
   });
   const H = Y[3] + R + 50;
@@ -1007,7 +1007,7 @@ function renderLoose(side) {
   // liste simple, sans répartition ; les témoins d'abord ; un +1 renseigné s'affiche en pastille sur son hôte
   const rest = people.filter(g => g.cote === side && !IN_TREE.has(g.id) && !g.plusOneOf && !presta(g))
     .sort((a, b) => (!!TEMOIN_OF[b.id] - !!TEMOIN_OF[a.id]) || (!a.nom - !b.nom) || (a.nom || "").localeCompare(b.nom || "") || a.prenom.localeCompare(b.prenom));
-  const pill = g => PLUS[g.id] ? `<span class="p1pill${PLUS[g.id].valide || !g.valide ? "" : " is-wait"}" data-id="${PLUS[g.id].id}" data-side="${PLUS[g.id].cote}" title="Accompagnant : ${fullName(PLUS[g.id])}">${initials(PLUS[g.id])}</span>`
+  const pill = g => PLUS[g.id] ? `<span class="p1pill${PLUS[g.id].valide || !g.valide ? "" : " is-wait"}" data-id="${PLUS[g.id].id}" data-side="${PLUS[g.id].cote}" title="${gw(PLUS[g.id], "Accompagnant", "Accompagnante")} : ${fullName(PLUS[g.id])}"${PLUS[g.id].photo ? ` style="background:url('${PLUS[g.id].photo}') center / cover no-repeat"` : ""}>${PLUS[g.id].photo ? "" : initials(PLUS[g.id])}</span>`
     : openP1(g) ? `<span class="p1pill p1pill--open" title="Accompagnement à confirmer">${ACC}</span>` : "";
   const node = g => `<button class="lnode${TEMOIN_OF[g.id] ? " lnode--temoin" : ""}${g.valide ? "" : " is-wait"}" data-id="${g.id}"${TEMOIN_OF[g.id] ? ` data-of="${TEMOIN_OF[g.id]}"` : ""}><span class="lwrap">${avatar(g)}${pill(g)}</span><b>${g.prenom.replace(" ?", "") || "?"}</b><small>${g.nom || ""}${PLUS[g.id] ? `<br>${ACC} ${PLUS[g.id].prenom}` : ""}</small>${TEMOIN_OF[g.id] ? `<span class="temoin-badge">Témoin</span>` : ""}</button>`;
   document.getElementById("loose-" + (side || "none")).innerHTML = rest.length ? `<div class="loose__people">${rest.map(node).join("")}</div>` : "";
