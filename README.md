@@ -52,7 +52,7 @@ Champs d'un invité :
 | `plus1` | `true` si la personne peut venir accompagnée |
 | `plusOneOf` | Pour un accompagnant nommé : `id` de la personne accompagnée. Il en reprend les invitations. |
 | `evOverride` | Exception pour un accompagnant, par exemple `{"repas": false}` |
-| `naissance` | `AAAA-MM-JJ`, ou `AAAA` si seule l'année est connue. Un `X` dans l'année (`197X`) donne une fourchette d'âge. |
+| `naissance` | `AAAA-MM-JJ`, `AAAA-MM-JJ/JJ` si le jour hésite entre deux dates, ou `AAAA` si seule l'année est connue. Un `X` dans l'année (`197X`) donne une fourchette d'âge. |
 | `valide` | `true` quand la personne a confirmé sa venue. Sinon, elle n'apparaît pas sur le site public. |
 
 Pour un refus, il suffit de retirer la ligne de l'invité.

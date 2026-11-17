@@ -656,11 +656,11 @@ const ageOf = g => {
   const [y, m, d] = g.naissance.split("-");
   if (!m) return [ageIn(+y, 12, 31), ageIn(+y, 1, 1)]; // année seule : fourchette d'un an
   if (y.includes("X")) { const y0 = +y.replace("X", "0"), y9 = +y.replace("X", "9"); return [ageIn(y9, +m, +d), ageIn(y0, +m, +d)]; }
-  return ageIn(+y, +m, +d);
+  return ageIn(+y, +m, parseInt(d.split("/").pop())); // jour incertain « 24/25 » : on prend le dernier
 };
 const ageTxt = g => { const a = ageOf(g); return a === null ? "âge ?" : Array.isArray(a) ? (a[0] === a[1] ? `${a[0]} ans` : `${a[0]} à ${a[1]} ans`) : `${a} an${a > 1 ? "s" : ""}`; };
 const MOIS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
-const dateFr = s => { const [y, m, d] = s.split("-"); if (!m) return y; return `${+d === 1 ? "1er" : +d} ${MOIS[+m - 1]} ${y.replace("X", "?")}`; };
+const dateFr = s => { const [y, m, d] = s.split("-"); if (!m) return y; return `${d.split("/").map(x => +x === 1 ? "1er" : +x).join(" ou ")} ${MOIS[+m - 1]} ${y.replace("X", "?")}`; };
 
 /* ---------- Bandeau : compteurs ---------- */
 function renderStats() {
