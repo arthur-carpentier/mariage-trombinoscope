@@ -189,7 +189,7 @@ select { font: inherit; font-weight: 700; color: var(--ink); background: var(--w
 }
 .avatar[data-side="Arthur"] { background: linear-gradient(145deg, #4c84a4, var(--blue)); }
 .avatar[data-side="Mathilde"] { background: linear-gradient(145deg, #c46a90, var(--rose)); }
-.avatar--photo { background-size: cover; background-position: center; color: transparent; }
+.avatar--photo { background-size: cover !important; background-position: center !important; background-repeat: no-repeat !important; color: transparent; }
 .avatar--ghost { background: var(--white) !important; border: 2px dashed var(--rose); color: var(--rose); }
 
 .tag { font-size: 0.7rem; font-weight: 800; border-radius: 999px; padding: 2px 8px; white-space: nowrap; }
@@ -885,6 +885,8 @@ document.getElementById("drawer").addEventListener("click", e => { if (e.target.
 
 /* ---------- Arbre généalogique unique (SVG) + entourage non relié ---------- */
 function renderTrees() { renderTree(); ["Arthur", "Mathilde", ""].forEach(renderLoose); }
+// photo découpée en rond dans l'arbre (la photo est déjà carrée)
+const photoRond = (g, x, y, r) => `<clipPath id="ph-${g.id}"><circle cx="${x}" cy="${y}" r="${r}"/></clipPath><image href="${g.photo}" x="${x - r}" y="${y - r}" width="${2 * r}" height="${2 * r}" preserveAspectRatio="xMidYMid slice" clip-path="url(#ph-${g.id})"/>`;
 function renderTree() {
   const SLOT = 86, R = 22, Y = [130, 280, 430, 580], PAD = 40, TREE_GAP = 0.5;
   const key = r => r.join("|"), pos = {};
@@ -964,8 +966,9 @@ function renderTree() {
     const g = find(...k.split("|")); if (!g) return;
     const c = g.cote === "Arthur" ? "#3A6E8C" : g.cote === "Mathilde" ? "#B05078" : "#5d7488", r = g.couple ? R + 5 : R;
     s += `<g class="tree-node${g.valide ? "" : " is-wait"}" data-id="${g.id}" tabindex="0" role="button" aria-label="${fullName(g)}${ROLE[g.id] ? ", " + ROLE[g.id] : ""}">
-      <circle cx="${p.x}" cy="${p.y}" r="${r}" fill="${c}" stroke="${g.couple ? "#F6D5E0" : "#FFFFFF"}" stroke-width="3"/>
-      <text x="${p.x}" y="${p.y + 5}" text-anchor="middle" fill="#FFFFFF" font-size="${g.couple ? 15 : 13}" font-weight="800">${initials(g)}</text>
+      ${g.photo ? photoRond(g, p.x, p.y, r) + `<circle cx="${p.x}" cy="${p.y}" r="${r}" fill="none" stroke="${g.couple ? "#F6D5E0" : "#FFFFFF"}" stroke-width="3"/>`
+        : `<circle cx="${p.x}" cy="${p.y}" r="${r}" fill="${c}" stroke="${g.couple ? "#F6D5E0" : "#FFFFFF"}" stroke-width="3"/>
+      <text x="${p.x}" y="${p.y + 5}" text-anchor="middle" fill="#FFFFFF" font-size="${g.couple ? 15 : 13}" font-weight="800">${initials(g)}</text>`}
       <text x="${p.x}" y="${p.y + r + 16}" text-anchor="middle" fill="#34526A" font-size="12.5" font-weight="800">${g.prenom}</text>
       <text x="${p.x}" y="${p.y + r + 29}" text-anchor="middle" fill="#5d7488" font-size="9.5" font-weight="700" letter-spacing=".4">${g.nom}</text>
       ${openP1(g) ? `<g><circle cx="${p.x + r * 0.8}" cy="${p.y + r * 0.7}" r="10" fill="#FFFFFF" stroke="#B05078" stroke-width="1.5" stroke-dasharray="3 2"/><text x="${p.x + r * 0.8}" y="${p.y + r * 0.7 + 3.5}" text-anchor="middle" font-size="0"></text><use href="#acc-sym" x="${p.x + r * 0.8 - 6}" y="${p.y + r * 0.7 - 6}" width="12" height="12" fill="#B05078"/></g>` : ""}
