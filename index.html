@@ -654,12 +654,13 @@ const ageIn = (y, m, d) => { let a = TODAY.getFullYear() - y; if (TODAY.getMonth
 const ageOf = g => {
   if (!g.naissance) return null;
   const [y, m, d] = g.naissance.split("-");
+  if (!m) return [ageIn(+y, 12, 31), ageIn(+y, 1, 1)]; // année seule : fourchette d'un an
   if (y.includes("X")) { const y0 = +y.replace("X", "0"), y9 = +y.replace("X", "9"); return [ageIn(y9, +m, +d), ageIn(y0, +m, +d)]; }
-  return ageIn(+y, +m, +d);
+  return ageIn(+y, +m, parseInt(d.split("/").pop())); // jour incertain « 24/25 » : on prend le dernier
 };
-const ageTxt = g => { const a = ageOf(g); return a === null ? "âge ?" : Array.isArray(a) ? `${a[0]} à ${a[1]} ans` : `${a} an${a > 1 ? "s" : ""}`; };
+const ageTxt = g => { const a = ageOf(g); return a === null ? "âge ?" : Array.isArray(a) ? (a[0] === a[1] ? `${a[0]} ans` : `${a[0]} à ${a[1]} ans`) : `${a} an${a > 1 ? "s" : ""}`; };
 const MOIS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
-const dateFr = s => { const [y, m, d] = s.split("-"); return `${+d === 1 ? "1er" : +d} ${MOIS[+m - 1]} ${y.replace("X", "?")}`; };
+const dateFr = s => { const [y, m, d] = s.split("-"); if (!m) return y; return `${d.split("/").map(x => +x === 1 ? "1er" : +x).join(" ou ")} ${MOIS[+m - 1]} ${y.replace("X", "?")}`; };
 
 /* ---------- Bandeau : compteurs ---------- */
 function renderStats() {
@@ -687,6 +688,7 @@ const tags = g => {
   if (ROLE[g.id]) t.push(`<span class="tag tag--lien">${ROLE[g.id]}</span>`);
   else if (g.lien && g.lien !== "Autre") t.push(`<span class="tag tag--lien">${LIEN_LABEL[g.lien] || g.lien}</span>`);
   if (sub(g) && !g.couple && !ROLE[g.id]) t.push(`<span class="tag tag--groupe">${sub(g)}</span>`);
+  if (g.entreprise) t.push(`<span class="tag tag--groupe">${g.entreprise}</span>`); // prestataire : nom de l'entreprise
   // sur les cartes : parrainages seulement s'ils concernent Arthur ou Mathilde (tous restent dans la fiche)
   (EXTRA[g.id] || []).filter(x => !/^(Parrain|Marraine|Filleul|Filleule) /.test(x) || /(d'Arthur|de Mathilde)$/.test(x)).forEach(x => t.push(`<span class="tag tag--special">${x}</span>`));
   return `<div class="card__tags">${t.join("")}</div>`;
@@ -732,7 +734,7 @@ function row(g, host) {
     <th scope="row" class="tperson">${host ? `<span class="tplus" aria-hidden="true">↳</span>` : ""}${avatar(g)}<span><b>${g.prenom}</b> ${g.nom} <span class="pron">${g.pronom || ""}</span>${host ? `<small>accompagne ${host.prenom}</small>` : ""}</span></th>
     <td>${g.cote ? `<span class="tag tag--side-${g.cote}">${g.cote}</span>` : ""}</td>
     <td>${ROLE[g.id] || (g.lien && g.lien !== "Autre" ? LIEN_LABEL[g.lien] : "")}${(EXTRA[g.id] || []).filter(x => /^Témoin/.test(x) || /(d'Arthur|de Mathilde)$/.test(x)).map(x => `<span class="tag tag--special">${x}</span>`).join("")}</td>
-    <td>${ROLE[g.id] ? "" : (sub(g) || "")}</td>
+    <td>${ROLE[g.id] ? "" : [sub(g), g.entreprise].filter(Boolean).join(", ")}</td>
     ${PUBLIC ? "" : EVENTS.map(e => `<td class="tev">${g.ev[e.k] ? yes : no}</td>`).join("") + `<td class="tev">${repIcon(g)}</td>`}
     ${state.ages ? `<td class="tnum">${ageOf(g) === null ? `<span class="tmuted">?</span>` : ageTxt(g)}</td>` : ""}
   </tr>`;
@@ -855,9 +857,10 @@ function openDrawer(id) {
         ${ROLE[g.id] ? `<span class="tag tag--lien">${ROLE[g.id]}</span>` : g.lien && g.lien !== "Autre" ? `<span class="tag tag--lien">${LIEN_LABEL[g.lien] || g.lien}</span>` : ""}
         ${(EXTRA[g.id] || []).map(x => `<span class="tag tag--special">${x}</span>`).join("")}
         ${sub(g) && !g.couple && !ROLE[g.id] ? `<span class="tag tag--groupe">${sub(g)}</span>` : ""}
+        ${g.entreprise ? `<span class="tag tag--groupe">${g.entreprise}</span>` : ""}
       </div></div></div>
     ${PUBLIC || presta(g) ? "" : `<div><h3>Réponse à l'invitation</h3><span class="ok-pill${g.valide ? "" : " ok-pill--wait"}">${repIcon(g, true)}${g.valide ? "Validé" : "En attente de réponse"}</span></div>`}
-    <div><h3>Âge</h3><p style="margin:0;font-size:.95rem;font-weight:700">${g.naissance ? `${ageTxt(g)}, ${gw(g, "né", "née")} le ${dateFr(g.naissance)}${g.naissance.includes("X") ? `<br><span style="color:var(--ink-soft);font-weight:600;font-size:.85rem">Année incomplète : l'âge est donné en fourchette.</span>` : ""}` : `<span style="color:var(--ink-soft);font-weight:600">Date de naissance à renseigner. L'âge sera calculé automatiquement à la date du jour.</span>`}</p></div>
+    <div><h3>Âge</h3><p style="margin:0;font-size:.95rem;font-weight:700">${g.naissance ? `${ageTxt(g)}, ${gw(g, "né", "née")} ${g.naissance.includes("-") ? "le" : "en"} ${dateFr(g.naissance)}${g.naissance.includes("X") ? `<br><span style="color:var(--ink-soft);font-weight:600;font-size:.85rem">Année incomplète : l'âge est donné en fourchette.</span>` : ""}` : `<span style="color:var(--ink-soft);font-weight:600">Date de naissance à renseigner. L'âge sera calculé automatiquement à la date du jour.</span>`}</p></div>
     ${g.photo ? "" : `<div class="photo-drop">Pas encore de photo : les initiales s'affichent à la place.</div>`}
     ${(() => {
       const ln = [...GODLINKS.filter(l => l.to === g).map(l => [gw(l.from, "Parrain", "Marraine"), l.from]), ...GODLINKS.filter(l => l.from === g).map(l => [gw(l.to, "Filleul", "Filleule"), l.to])];
@@ -979,7 +982,7 @@ function renderTree() {
     const pt = PLUS[g.id];
     if (pt) {
       const pc = pt.cote === "Arthur" ? "#3A6E8C" : "#B05078";
-      s += `<g class="tree-node${pt.valide || !g.valide ? "" : " is-wait"}" data-id="${pt.id}" role="button" aria-label="${fullName(pt)}, accompagne ${g.prenom}"><circle cx="${p.x + r * 0.8}" cy="${p.y + r * 0.7}" r="11" fill="${pc}" stroke="#FFFFFF" stroke-width="2"/><text x="${p.x + r * 0.8}" y="${p.y + r * 0.7 + 3.5}" text-anchor="middle" font-size="8.5" font-weight="800" fill="#FFFFFF">${initials(pt)}</text></g>`;
+      s += `<g class="tree-node${pt.valide || !g.valide ? "" : " is-wait"}" data-id="${pt.id}" role="button" aria-label="${fullName(pt)}, accompagne ${g.prenom}"><circle cx="${p.x + r * 0.8}" cy="${p.y + r * 0.7}" r="11" fill="${pc}" stroke="#FFFFFF" stroke-width="2"/>${pt.photo ? photoRond(pt, p.x + r * 0.8, p.y + r * 0.7, 10) : `<text x="${p.x + r * 0.8}" y="${p.y + r * 0.7 + 3.5}" text-anchor="middle" font-size="8.5" font-weight="800" fill="#FFFFFF">${initials(pt)}</text>`}</g>`;
     }
   });
   const H = Y[3] + R + 50;
@@ -1007,7 +1010,7 @@ function renderLoose(side) {
   // liste simple, sans répartition ; les témoins d'abord ; un +1 renseigné s'affiche en pastille sur son hôte
   const rest = people.filter(g => g.cote === side && !IN_TREE.has(g.id) && !g.plusOneOf && !presta(g))
     .sort((a, b) => (!!TEMOIN_OF[b.id] - !!TEMOIN_OF[a.id]) || (!a.nom - !b.nom) || (a.nom || "").localeCompare(b.nom || "") || a.prenom.localeCompare(b.prenom));
-  const pill = g => PLUS[g.id] ? `<span class="p1pill${PLUS[g.id].valide || !g.valide ? "" : " is-wait"}" data-id="${PLUS[g.id].id}" data-side="${PLUS[g.id].cote}" title="Accompagnant : ${fullName(PLUS[g.id])}">${initials(PLUS[g.id])}</span>`
+  const pill = g => PLUS[g.id] ? `<span class="p1pill${PLUS[g.id].valide || !g.valide ? "" : " is-wait"}" data-id="${PLUS[g.id].id}" data-side="${PLUS[g.id].cote}" title="${gw(PLUS[g.id], "Accompagnant", "Accompagnante")} : ${fullName(PLUS[g.id])}"${PLUS[g.id].photo ? ` style="background:url('${PLUS[g.id].photo}') center / cover no-repeat"` : ""}>${PLUS[g.id].photo ? "" : initials(PLUS[g.id])}</span>`
     : openP1(g) ? `<span class="p1pill p1pill--open" title="Accompagnement à confirmer">${ACC}</span>` : "";
   const node = g => `<button class="lnode${TEMOIN_OF[g.id] ? " lnode--temoin" : ""}${g.valide ? "" : " is-wait"}" data-id="${g.id}"${TEMOIN_OF[g.id] ? ` data-of="${TEMOIN_OF[g.id]}"` : ""}><span class="lwrap">${avatar(g)}${pill(g)}</span><b>${g.prenom.replace(" ?", "") || "?"}</b><small>${g.nom || ""}${PLUS[g.id] ? `<br>${ACC} ${PLUS[g.id].prenom}` : ""}</small>${TEMOIN_OF[g.id] ? `<span class="temoin-badge">Témoin</span>` : ""}</button>`;
   document.getElementById("loose-" + (side || "none")).innerHTML = rest.length ? `<div class="loose__people">${rest.map(node).join("")}</div>` : "";
