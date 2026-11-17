@@ -654,12 +654,13 @@ const ageIn = (y, m, d) => { let a = TODAY.getFullYear() - y; if (TODAY.getMonth
 const ageOf = g => {
   if (!g.naissance) return null;
   const [y, m, d] = g.naissance.split("-");
+  if (!m) return [ageIn(+y, 12, 31), ageIn(+y, 1, 1)]; // année seule : fourchette d'un an
   if (y.includes("X")) { const y0 = +y.replace("X", "0"), y9 = +y.replace("X", "9"); return [ageIn(y9, +m, +d), ageIn(y0, +m, +d)]; }
   return ageIn(+y, +m, +d);
 };
-const ageTxt = g => { const a = ageOf(g); return a === null ? "âge ?" : Array.isArray(a) ? `${a[0]} à ${a[1]} ans` : `${a} an${a > 1 ? "s" : ""}`; };
+const ageTxt = g => { const a = ageOf(g); return a === null ? "âge ?" : Array.isArray(a) ? (a[0] === a[1] ? `${a[0]} ans` : `${a[0]} à ${a[1]} ans`) : `${a} an${a > 1 ? "s" : ""}`; };
 const MOIS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
-const dateFr = s => { const [y, m, d] = s.split("-"); return `${+d === 1 ? "1er" : +d} ${MOIS[+m - 1]} ${y.replace("X", "?")}`; };
+const dateFr = s => { const [y, m, d] = s.split("-"); if (!m) return y; return `${+d === 1 ? "1er" : +d} ${MOIS[+m - 1]} ${y.replace("X", "?")}`; };
 
 /* ---------- Bandeau : compteurs ---------- */
 function renderStats() {
@@ -857,7 +858,7 @@ function openDrawer(id) {
         ${sub(g) && !g.couple && !ROLE[g.id] ? `<span class="tag tag--groupe">${sub(g)}</span>` : ""}
       </div></div></div>
     ${PUBLIC || presta(g) ? "" : `<div><h3>Réponse à l'invitation</h3><span class="ok-pill${g.valide ? "" : " ok-pill--wait"}">${repIcon(g, true)}${g.valide ? "Validé" : "En attente de réponse"}</span></div>`}
-    <div><h3>Âge</h3><p style="margin:0;font-size:.95rem;font-weight:700">${g.naissance ? `${ageTxt(g)}, ${gw(g, "né", "née")} le ${dateFr(g.naissance)}${g.naissance.includes("X") ? `<br><span style="color:var(--ink-soft);font-weight:600;font-size:.85rem">Année incomplète : l'âge est donné en fourchette.</span>` : ""}` : `<span style="color:var(--ink-soft);font-weight:600">Date de naissance à renseigner. L'âge sera calculé automatiquement à la date du jour.</span>`}</p></div>
+    <div><h3>Âge</h3><p style="margin:0;font-size:.95rem;font-weight:700">${g.naissance ? `${ageTxt(g)}, ${gw(g, "né", "née")} ${g.naissance.includes("-") ? "le" : "en"} ${dateFr(g.naissance)}${g.naissance.includes("X") ? `<br><span style="color:var(--ink-soft);font-weight:600;font-size:.85rem">Année incomplète : l'âge est donné en fourchette.</span>` : ""}` : `<span style="color:var(--ink-soft);font-weight:600">Date de naissance à renseigner. L'âge sera calculé automatiquement à la date du jour.</span>`}</p></div>
     ${g.photo ? "" : `<div class="photo-drop">Pas encore de photo : les initiales s'affichent à la place.</div>`}
     ${(() => {
       const ln = [...GODLINKS.filter(l => l.to === g).map(l => [gw(l.from, "Parrain", "Marraine"), l.from]), ...GODLINKS.filter(l => l.from === g).map(l => [gw(l.to, "Filleul", "Filleule"), l.to])];
