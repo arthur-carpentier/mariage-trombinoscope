@@ -37,10 +37,11 @@ async function dechiffrer(paquet) {
 
 // version publique : invités validés, sans invitations ni accompagnants à confirmer
 function versionPublique(d) {
-  const ok = new Set(d.invites.filter(g => g.valide).map(g => `${g.nom}|${g.prenom}`));
+  const pub = g => g.valide && g.lien !== "Prestataire"; // les prestataires ne sont jamais publics
+  const ok = new Set(d.invites.filter(pub).map(g => `${g.nom}|${g.prenom}`));
   const valide = ref => ref && ok.has(ref.join("|"));
   const garder = ["id", "nom", "prenom", "groupe", "cote", "lien", "pronom", "valide", "plusOneOf", "naissance", "photo"];
-  const invites = d.invites.filter(g => g.valide).map(g => {
+  const invites = d.invites.filter(pub).map(g => {
     const x = Object.fromEntries(garder.filter(k => g[k] !== undefined).map(k => [k, g[k]]));
     return { ...x, ev: {} };
   });

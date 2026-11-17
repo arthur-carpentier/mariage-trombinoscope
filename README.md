@@ -46,7 +46,7 @@ Champs d'un invité :
 | `nom`, `prenom` | Identité. Les initiales servent tant qu'il n'y a pas de photo. |
 | `pronom` | `il` ou `elle`. Sert à accorder les termes (cousin, cousine, accompagnant…). |
 | `cote` | `Arthur` ou `Mathilde` |
-| `lien` | `Famille proche` (affiché « Famille directe »), `Famille éloignée` (« Famille élargie »), `Ami proche`, `Copains`, `Travail`, `Autre` (amis et travail sont regroupés en « Amis ») |
+| `lien` | `Famille proche` (affiché « Famille directe »), `Famille éloignée` (« Famille élargie »), `Ami proche`, `Copains`, `Travail`, `Autre` (amis et travail sont regroupés en « Amis »), `Prestataire` (métier dans `groupe` ; visible seulement en privé, hors chiffres, arbre et diagramme) |
 | `groupe` | Bande d'amis (ENSAT, EKIP, Travail, Vieux…) |
 | `ev` | Invitations : `mairie`, `eglise`, `vin`, `repas`, `brunch` |
 | `plus1` | `true` si la personne peut venir accompagnée |
@@ -56,6 +56,15 @@ Champs d'un invité :
 | `valide` | `true` quand la personne a confirmé sa venue. Sinon, elle n'apparaît pas sur le site public. |
 
 Pour un refus, il suffit de retirer la ligne de l'invité.
+
+## Photos
+
+```
+python3 outils/photo.py NOM Prénom image.jpg CX CY COTE [--couleurs[=FORCE]]
+CODE="…" node outils/donnees.mjs publier
+```
+
+`CX`, `CY` : centre du visage dans l'image d'origine, en pixels ; `COTE` : côté du carré à garder. La photo est recadrée en carré sans être étirée, réduite à 256 px et rangée dans `prive/donnees.json`. La page l'affiche en rond. `--couleurs` corrige une dominante (photo trop rose ou trop rouge) ; `FORCE` va de 0 à 1 (0.85 par défaut), à baisser si la photo devient trop froide. Elle n'est publiée en clair que pour les invités qui ont validé.
 
 ## Mise en ligne
 

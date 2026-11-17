@@ -133,7 +133,7 @@ select { font: inherit; font-weight: 700; color: var(--ink); background: var(--w
 .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
 .card[data-side="Arthur"] { border-top: 4px solid var(--side-arthur); }
 .card[data-side="Mathilde"] { border-top: 4px solid var(--side-mathilde); }
-.card[data-side=""] { border-top: 4px dashed var(--ink-soft); }
+.card[data-side=""] { border-top: 4px solid var(--green); } /* prestataires */
 .card__name { font-weight: 800; font-size: 1rem; line-height: 1.2; color: var(--ink); }
 .card__nom { display: block; font-size: 0.74rem; letter-spacing: 0.08em; font-weight: 700; color: var(--ink-soft); }
 .card__age { font-size: 0.78rem; font-weight: 800; color: var(--green); font-variant-numeric: tabular-nums; }
@@ -189,7 +189,7 @@ select { font: inherit; font-weight: 700; color: var(--ink); background: var(--w
 }
 .avatar[data-side="Arthur"] { background: linear-gradient(145deg, #4c84a4, var(--blue)); }
 .avatar[data-side="Mathilde"] { background: linear-gradient(145deg, #c46a90, var(--rose)); }
-.avatar--photo { background-size: cover; background-position: center; color: transparent; }
+.avatar--photo { background-size: cover !important; background-position: center !important; background-repeat: no-repeat !important; color: transparent; }
 .avatar--ghost { background: var(--white) !important; border: 2px dashed var(--rose); color: var(--rose); }
 
 .tag { font-size: 0.7rem; font-weight: 800; border-radius: 999px; padding: 2px 8px; white-space: nowrap; }
@@ -544,8 +544,8 @@ const EVENTS = [
   { k: "repas", l: "Repas", s: "R" },
   { k: "brunch", l: "Brunch", s: "B" },
 ];
-const LIENS = ["Famille proche", "Famille éloignée", "Amis", "Autre"];
-const LIEN_LABEL = { "Famille proche": "Famille directe", "Famille éloignée": "Famille élargie", "Amis": "Amis", "Autre": "Autres", "": "À compléter" };
+const LIENS = ["Famille proche", "Famille éloignée", "Amis", "Autre", "Prestataire"];
+const LIEN_LABEL = { "Famille proche": "Famille directe", "Famille éloignée": "Famille élargie", "Amis": "Amis", "Autre": "Autres", "Prestataire": "Prestataires", "": "À compléter" };
 
 const cap = s => s.toLowerCase().replace(/(^|[\s'-])(\p{L})/gu, (m, a, b) => a + b.toUpperCase());
 const guests = RAW.map(g => ({ ...g, nomAff: g.nom, todo: [] }));
@@ -563,7 +563,10 @@ guests.forEach(g => {
 });
 const byId = Object.fromEntries(guests.map(g => [g.id, g]));
 // une personne invitée à aucun événement figure seulement dans l'arbre (ni trombinoscope, ni diagramme, ni chiffres)
-const invite = g => g.couple || Object.values(g.ev || {}).some(Boolean) || PUBLIC;
+// prestataires (lien « Prestataire », métier dans « groupe ») : trombinoscope privé seulement, hors chiffres, arbre et diagramme
+const presta = g => g.lien === "Prestataire";
+guests.forEach(g => { if (presta(g)) g.valide = true; });
+const invite = g => g.couple || Object.values(g.ev || {}).some(Boolean) || PUBLIC || presta(g);
 const people = guests.filter(g => !g.couple && invite(g));
 const initials = g => ((g.prenom || "?").replace("?", "").trim()[0] || "?") + (g.nom ? g.nom[0] : "");
 const fullName = g => `${g.prenom.replace(" ?", "")} ${g.nom ? cap(g.nom) : ""}`.trim();
@@ -660,9 +663,9 @@ const dateFr = s => { const [y, m, d] = s.split("-"); return `${+d === 1 ? "1er"
 
 /* ---------- Bandeau : compteurs ---------- */
 function renderStats() {
-  const total = guests.filter(invite).length;
+  const total = guests.filter(g => invite(g) && !presta(g)).length;
   const p1 = plusOnes.length;
-  const ok = guests.filter(g => g.valide && invite(g)).length;
+  const ok = guests.filter(g => g.valide && invite(g) && !presta(g)).length;
   if (PUBLIC) { document.getElementById("stats").innerHTML = `<div class="stat"><span class="stat__n">${total}</span><span class="stat__l">invités ont confirmé</span><span class="stat__p">&nbsp;</span></div>`; return; }
   const html = [`<div class="stat"><span class="stat__n">${total + p1}</span><span class="stat__l">invités</span><span class="stat__p">dont ${p1} ${ACC} à valider</span></div>`,
     `<div class="stat"><span class="stat__n" style="color:var(--green)">${ok}</span><span class="stat__l">ont validé</span><span class="stat__p" style="color:var(--ink-soft)">${total - ok} en attente</span></div>`];
@@ -779,7 +782,7 @@ function renderTrombi() {
   if (order) keys.sort((a, b) => order.indexOf(a) - order.indexOf(b));
   else if (state.groupby === "cote") keys.sort((a, b) => (a || "zz").localeCompare(b || "zz"));
   else if (state.groupby === "groupe") keys.sort((a, b) => groups.get(b).length - groups.get(a).length);
-  const label = k => state.groupby === "lien" ? LIEN_LABEL[k] : state.groupby === "cote" ? (k ? "Côté " + k : "Côté à préciser") : (k || "À compléter");
+  const label = k => state.groupby === "lien" ? LIEN_LABEL[k] : state.groupby === "cote" ? (k ? "Côté " + k : "Prestataires") : (k || "À compléter");
   let p1count = 0;
   const html = keys.map(k => {
     const asTable = state.view === "table";
@@ -790,7 +793,7 @@ function renderTrombi() {
       return h;
     }).join("");
     const n = groups.get(k).reduce((a, g) => a + 1 + (PLUS[g.id] && all.includes(PLUS[g.id]) ? 1 : (state.p1 && openP1(g) ? 1 : 0)), 0);
-    return `<section class="group"><div class="group__head"><h2>${label(k)}</h2><span>${n} invité${n > 1 ? "s" : ""}</span></div>${state.view === "table" ? tableWrap(items) : `<div class="grid">${items}</div>`}</section>`;
+    return `<section class="group"><div class="group__head"><h2>${label(k)}</h2><span>${n} ${k === "Prestataire" && state.groupby === "lien" ? "prestataire" : "invité"}${n > 1 ? "s" : ""}</span></div>${state.view === "table" ? tableWrap(items) : `<div class="grid">${items}</div>`}</section>`;
   }).join("");
   document.getElementById("trombi").innerHTML = html || `<div class="note"><span>Aucun invité ne correspond à ces filtres.</span></div>`;
   // même base que les chiffres du haut : +1 nommés compris ; les mariés ne sont pas dans la grille
@@ -848,12 +851,12 @@ function openDrawer(id) {
     <button class="drawer__close" id="d-close">Fermer</button>
     <div class="drawer__id">${avatar(g)}<div><h2 id="d-name">${fullName(g)}</h2><span class="pron">${g.pronom || ""}</span>
       <div class="card__tags" style="justify-content:flex-start;margin-top:6px">
-        ${g.cote ? `<span class="tag tag--side-${g.cote}">Côté ${g.cote}</span>` : `<span class="tag tag--todo">Côté à préciser</span>`}
+        ${g.cote ? `<span class="tag tag--side-${g.cote}">Côté ${g.cote}</span>` : presta(g) ? "" : `<span class="tag tag--todo">Côté à préciser</span>`}
         ${ROLE[g.id] ? `<span class="tag tag--lien">${ROLE[g.id]}</span>` : g.lien && g.lien !== "Autre" ? `<span class="tag tag--lien">${LIEN_LABEL[g.lien] || g.lien}</span>` : ""}
         ${(EXTRA[g.id] || []).map(x => `<span class="tag tag--special">${x}</span>`).join("")}
         ${sub(g) && !g.couple && !ROLE[g.id] ? `<span class="tag tag--groupe">${sub(g)}</span>` : ""}
       </div></div></div>
-    ${PUBLIC ? "" : `<div><h3>Réponse à l'invitation</h3><span class="ok-pill${g.valide ? "" : " ok-pill--wait"}">${repIcon(g, true)}${g.valide ? "Validé" : "En attente de réponse"}</span></div>`}
+    ${PUBLIC || presta(g) ? "" : `<div><h3>Réponse à l'invitation</h3><span class="ok-pill${g.valide ? "" : " ok-pill--wait"}">${repIcon(g, true)}${g.valide ? "Validé" : "En attente de réponse"}</span></div>`}
     <div><h3>Âge</h3><p style="margin:0;font-size:.95rem;font-weight:700">${g.naissance ? `${ageTxt(g)}, ${gw(g, "né", "née")} le ${dateFr(g.naissance)}${g.naissance.includes("X") ? `<br><span style="color:var(--ink-soft);font-weight:600;font-size:.85rem">Année incomplète : l'âge est donné en fourchette.</span>` : ""}` : `<span style="color:var(--ink-soft);font-weight:600">Date de naissance à renseigner. L'âge sera calculé automatiquement à la date du jour.</span>`}</p></div>
     ${g.photo ? "" : `<div class="photo-drop">Pas encore de photo : les initiales s'affichent à la place.</div>`}
     ${(() => {
@@ -869,7 +872,7 @@ function openDrawer(id) {
         : [[gw(g, "Femme", "Mari"), f.parents.filter(x => x !== g)], ["Enfants", f.enfants]];
       return `<div><h3>Famille</h3>${rows.filter(r => r[1].length).map(([l, arr]) => `<div class="mini" style="margin-bottom:6px">${arr.map(x => `<button data-id="${x.id}">${avatar(x)}<span><small style="color:var(--green);font-weight:800">${arr.length > 1 || l === "Parents" || l === "Enfants" ? l.replace(/s$/, "").replace("Frères et sœur", gw(x, "Frère", "Sœur")).replace("Parent", gw(x, "Père", "Mère")).replace("Enfant", gw(x, "Fils", "Fille")) : l}</small> ${fullName(x)}</span></button>`).join("")}</div>`).join("")}</div>`;
     })()}
-    ${PUBLIC ? "" : `<div><h3>Invitations</h3><div class="evlist">${EVENTS.map(e => `<div><span>${e.l}</span><span class="${g.ev[e.k] ? "yes" : "no"}">${g.ev[e.k] ? "Oui" : "Non"}</span></div>`).join("")}</div></div>`}
+    ${PUBLIC || presta(g) ? "" : `<div><h3>Invitations</h3><div class="evlist">${EVENTS.map(e => `<div><span>${e.l}</span><span class="${g.ev[e.k] ? "yes" : "no"}">${g.ev[e.k] ? "Oui" : "Non"}</span></div>`).join("")}</div></div>`}
     ${PLUS[g.id] ? `<div><h3>${gw(PLUS[g.id], "Accompagnant", "Accompagnante")}</h3><div class="mini"><button data-id="${PLUS[g.id].id}">${avatar(PLUS[g.id])}${fullName(PLUS[g.id])}</button></div></div>` : ""}
     ${hostOf(g) ? `<div><h3>Accompagne</h3><div class="mini"><button data-id="${hostOf(g).id}">${avatar(hostOf(g))}${fullName(hostOf(g))}</button></div></div>` : ""}
     ${openP1(g) ? `<div><h3>Accompagnement</h3><div class="mini"><button disabled style="cursor:default"><span class="avatar avatar--ghost">${ACC}</span>Nom à confirmer</button></div><p style="font-size:.82rem;color:var(--ink-soft);margin:6px 0 0">Une fois le nom connu, l'accompagnant devient un invité à part entière, relié à ${g.prenom}.</p></div>` : ""}
@@ -885,6 +888,8 @@ document.getElementById("drawer").addEventListener("click", e => { if (e.target.
 
 /* ---------- Arbre généalogique unique (SVG) + entourage non relié ---------- */
 function renderTrees() { renderTree(); ["Arthur", "Mathilde", ""].forEach(renderLoose); }
+// photo découpée en rond dans l'arbre (la photo est déjà carrée)
+const photoRond = (g, x, y, r) => `<clipPath id="ph-${g.id}"><circle cx="${x}" cy="${y}" r="${r}"/></clipPath><image href="${g.photo}" x="${x - r}" y="${y - r}" width="${2 * r}" height="${2 * r}" preserveAspectRatio="xMidYMid slice" clip-path="url(#ph-${g.id})"/>`;
 function renderTree() {
   const SLOT = 86, R = 22, Y = [130, 280, 430, 580], PAD = 40, TREE_GAP = 0.5;
   const key = r => r.join("|"), pos = {};
@@ -964,8 +969,9 @@ function renderTree() {
     const g = find(...k.split("|")); if (!g) return;
     const c = g.cote === "Arthur" ? "#3A6E8C" : g.cote === "Mathilde" ? "#B05078" : "#5d7488", r = g.couple ? R + 5 : R;
     s += `<g class="tree-node${g.valide ? "" : " is-wait"}" data-id="${g.id}" tabindex="0" role="button" aria-label="${fullName(g)}${ROLE[g.id] ? ", " + ROLE[g.id] : ""}">
-      <circle cx="${p.x}" cy="${p.y}" r="${r}" fill="${c}" stroke="${g.couple ? "#F6D5E0" : "#FFFFFF"}" stroke-width="3"/>
-      <text x="${p.x}" y="${p.y + 5}" text-anchor="middle" fill="#FFFFFF" font-size="${g.couple ? 15 : 13}" font-weight="800">${initials(g)}</text>
+      ${g.photo ? photoRond(g, p.x, p.y, r) + `<circle cx="${p.x}" cy="${p.y}" r="${r}" fill="none" stroke="${g.couple ? "#F6D5E0" : "#FFFFFF"}" stroke-width="3"/>`
+        : `<circle cx="${p.x}" cy="${p.y}" r="${r}" fill="${c}" stroke="${g.couple ? "#F6D5E0" : "#FFFFFF"}" stroke-width="3"/>
+      <text x="${p.x}" y="${p.y + 5}" text-anchor="middle" fill="#FFFFFF" font-size="${g.couple ? 15 : 13}" font-weight="800">${initials(g)}</text>`}
       <text x="${p.x}" y="${p.y + r + 16}" text-anchor="middle" fill="#34526A" font-size="12.5" font-weight="800">${g.prenom}</text>
       <text x="${p.x}" y="${p.y + r + 29}" text-anchor="middle" fill="#5d7488" font-size="9.5" font-weight="700" letter-spacing=".4">${g.nom}</text>
       ${openP1(g) ? `<g><circle cx="${p.x + r * 0.8}" cy="${p.y + r * 0.7}" r="10" fill="#FFFFFF" stroke="#B05078" stroke-width="1.5" stroke-dasharray="3 2"/><text x="${p.x + r * 0.8}" y="${p.y + r * 0.7 + 3.5}" text-anchor="middle" font-size="0"></text><use href="#acc-sym" x="${p.x + r * 0.8 - 6}" y="${p.y + r * 0.7 - 6}" width="12" height="12" fill="#B05078"/></g>` : ""}
@@ -999,7 +1005,7 @@ document.getElementById("show-god").addEventListener("change", e => { const g = 
 document.getElementById("tree-fit").addEventListener("click", e => setTreeFit(e.currentTarget.getAttribute("aria-pressed") !== "true"));
 function renderLoose(side) {
   // liste simple, sans répartition ; les témoins d'abord ; un +1 renseigné s'affiche en pastille sur son hôte
-  const rest = people.filter(g => g.cote === side && !IN_TREE.has(g.id) && !g.plusOneOf)
+  const rest = people.filter(g => g.cote === side && !IN_TREE.has(g.id) && !g.plusOneOf && !presta(g))
     .sort((a, b) => (!!TEMOIN_OF[b.id] - !!TEMOIN_OF[a.id]) || (!a.nom - !b.nom) || (a.nom || "").localeCompare(b.nom || "") || a.prenom.localeCompare(b.prenom));
   const pill = g => PLUS[g.id] ? `<span class="p1pill${PLUS[g.id].valide || !g.valide ? "" : " is-wait"}" data-id="${PLUS[g.id].id}" data-side="${PLUS[g.id].cote}" title="Accompagnant : ${fullName(PLUS[g.id])}">${initials(PLUS[g.id])}</span>`
     : openP1(g) ? `<span class="p1pill p1pill--open" title="Accompagnement à confirmer">${ACC}</span>` : "";
@@ -1044,7 +1050,7 @@ function renderRadial() {
       sideNode.children.push(node);
     });
     // amis et autres : par bande
-    LIENS.filter(l => !l.startsWith("Famille")).concat([""]).forEach(l => {
+    LIENS.filter(l => !l.startsWith("Famille") && l !== "Prestataire").concat([""]).forEach(l => {
       const gs = people.filter(g => g.cote === side && g.lien === l && arbreMatch(g)); if (!gs.length) return;
       const node = { name: LIEN_LABEL[l], key: `l:${side}:${l}`, side, children: [] };
       pushGroups(node, gs, g => sub(g), true);
