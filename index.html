@@ -562,7 +562,9 @@ guests.forEach(g => {
   if (!Object.values(g.ev).some(Boolean)) g.todo.push("aucun événement coché");
 });
 const byId = Object.fromEntries(guests.map(g => [g.id, g]));
-const people = guests.filter(g => !g.couple);
+// une personne invitée à aucun événement figure seulement dans l'arbre (ni trombinoscope, ni diagramme, ni chiffres)
+const invite = g => g.couple || Object.values(g.ev || {}).some(Boolean) || PUBLIC;
+const people = guests.filter(g => !g.couple && invite(g));
 const initials = g => ((g.prenom || "?").replace("?", "").trim()[0] || "?") + (g.nom ? g.nom[0] : "");
 const fullName = g => `${g.prenom.replace(" ?", "")} ${g.nom ? cap(g.nom) : ""}`.trim();
 
@@ -657,9 +659,9 @@ const dateFr = s => { const [y, m, d] = s.split("-"); return `${+d === 1 ? "1er"
 
 /* ---------- Bandeau : compteurs ---------- */
 function renderStats() {
-  const total = guests.length;
+  const total = guests.filter(invite).length;
   const p1 = plusOnes.length;
-  const ok = guests.filter(g => g.valide).length;
+  const ok = guests.filter(g => g.valide && invite(g)).length;
   if (PUBLIC) { document.getElementById("stats").innerHTML = `<div class="stat"><span class="stat__n">${total}</span><span class="stat__l">invités ont confirmé</span><span class="stat__p">&nbsp;</span></div>`; return; }
   const html = [`<div class="stat"><span class="stat__n">${total + p1}</span><span class="stat__l">invités</span><span class="stat__p">dont ${p1} ${ACC} à valider</span></div>`,
     `<div class="stat"><span class="stat__n" style="color:var(--green)">${ok}</span><span class="stat__l">ont validé</span><span class="stat__p" style="color:var(--ink-soft)">${total - ok} en attente</span></div>`];
