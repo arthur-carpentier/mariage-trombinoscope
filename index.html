@@ -688,6 +688,7 @@ const tags = g => {
   if (ROLE[g.id]) t.push(`<span class="tag tag--lien">${ROLE[g.id]}</span>`);
   else if (g.lien && g.lien !== "Autre") t.push(`<span class="tag tag--lien">${LIEN_LABEL[g.lien] || g.lien}</span>`);
   if (sub(g) && !g.couple && !ROLE[g.id]) t.push(`<span class="tag tag--groupe">${sub(g)}</span>`);
+  if (g.entreprise) t.push(`<span class="tag tag--groupe">${g.entreprise}</span>`); // prestataire : nom de l'entreprise
   // sur les cartes : parrainages seulement s'ils concernent Arthur ou Mathilde (tous restent dans la fiche)
   (EXTRA[g.id] || []).filter(x => !/^(Parrain|Marraine|Filleul|Filleule) /.test(x) || /(d'Arthur|de Mathilde)$/.test(x)).forEach(x => t.push(`<span class="tag tag--special">${x}</span>`));
   return `<div class="card__tags">${t.join("")}</div>`;
@@ -733,7 +734,7 @@ function row(g, host) {
     <th scope="row" class="tperson">${host ? `<span class="tplus" aria-hidden="true">↳</span>` : ""}${avatar(g)}<span><b>${g.prenom}</b> ${g.nom} <span class="pron">${g.pronom || ""}</span>${host ? `<small>accompagne ${host.prenom}</small>` : ""}</span></th>
     <td>${g.cote ? `<span class="tag tag--side-${g.cote}">${g.cote}</span>` : ""}</td>
     <td>${ROLE[g.id] || (g.lien && g.lien !== "Autre" ? LIEN_LABEL[g.lien] : "")}${(EXTRA[g.id] || []).filter(x => /^Témoin/.test(x) || /(d'Arthur|de Mathilde)$/.test(x)).map(x => `<span class="tag tag--special">${x}</span>`).join("")}</td>
-    <td>${ROLE[g.id] ? "" : (sub(g) || "")}</td>
+    <td>${ROLE[g.id] ? "" : [sub(g), g.entreprise].filter(Boolean).join(", ")}</td>
     ${PUBLIC ? "" : EVENTS.map(e => `<td class="tev">${g.ev[e.k] ? yes : no}</td>`).join("") + `<td class="tev">${repIcon(g)}</td>`}
     ${state.ages ? `<td class="tnum">${ageOf(g) === null ? `<span class="tmuted">?</span>` : ageTxt(g)}</td>` : ""}
   </tr>`;
@@ -856,6 +857,7 @@ function openDrawer(id) {
         ${ROLE[g.id] ? `<span class="tag tag--lien">${ROLE[g.id]}</span>` : g.lien && g.lien !== "Autre" ? `<span class="tag tag--lien">${LIEN_LABEL[g.lien] || g.lien}</span>` : ""}
         ${(EXTRA[g.id] || []).map(x => `<span class="tag tag--special">${x}</span>`).join("")}
         ${sub(g) && !g.couple && !ROLE[g.id] ? `<span class="tag tag--groupe">${sub(g)}</span>` : ""}
+        ${g.entreprise ? `<span class="tag tag--groupe">${g.entreprise}</span>` : ""}
       </div></div></div>
     ${PUBLIC || presta(g) ? "" : `<div><h3>Réponse à l'invitation</h3><span class="ok-pill${g.valide ? "" : " ok-pill--wait"}">${repIcon(g, true)}${g.valide ? "Validé" : "En attente de réponse"}</span></div>`}
     <div><h3>Âge</h3><p style="margin:0;font-size:.95rem;font-weight:700">${g.naissance ? `${ageTxt(g)}, ${gw(g, "né", "née")} ${g.naissance.includes("-") ? "le" : "en"} ${dateFr(g.naissance)}${g.naissance.includes("X") ? `<br><span style="color:var(--ink-soft);font-weight:600;font-size:.85rem">Année incomplète : l'âge est donné en fourchette.</span>` : ""}` : `<span style="color:var(--ink-soft);font-weight:600">Date de naissance à renseigner. L'âge sera calculé automatiquement à la date du jour.</span>`}</p></div>
