@@ -46,13 +46,13 @@ Champs d'un invité :
 | `nom`, `prenom` | Identité. Les initiales servent tant qu'il n'y a pas de photo. |
 | `pronom` | `il` ou `elle`. Sert à accorder les termes (cousin, cousine, accompagnant…). |
 | `cote` | `Arthur` ou `Mathilde` |
-| `lien` | `Famille proche` (affiché « Famille directe »), `Famille éloignée` (« Famille élargie »), `Ami proche`, `Copains`, `Travail`, `Autre` (amis et travail sont regroupés en « Amis »), `Prestataire` (métier dans `groupe` ; visible seulement en privé, hors chiffres, arbre et diagramme) |
+| `lien` | `Famille proche` (affiché « Famille directe »), `Famille éloignée` (« Famille élargie »), `Ami proche`, `Copains`, `Travail`, `Autre` (amis et travail sont regroupés en « Amis »), `Prestataire` (métier dans `groupe`, entreprise dans `entreprise` ; visible seulement en privé, hors chiffres, arbre et diagramme) |
 | `groupe` | Bande d'amis (ENSAT, EKIP, Travail, Vieux…) |
 | `ev` | Invitations : `mairie`, `eglise`, `vin`, `repas`, `brunch` |
 | `plus1` | `true` si la personne peut venir accompagnée |
 | `plusOneOf` | Pour un accompagnant nommé : `id` de la personne accompagnée. Il en reprend les invitations. |
 | `evOverride` | Exception pour un accompagnant, par exemple `{"repas": false}` |
-| `naissance` | `AAAA-MM-JJ`. Un `X` dans l'année (`197X`) donne une fourchette d'âge. |
+| `naissance` | `AAAA-MM-JJ`, `AAAA-MM-JJ/JJ` si le jour hésite entre deux dates, ou `AAAA` si seule l'année est connue. Un `X` dans l'année (`197X`) donne une fourchette d'âge. |
 | `valide` | `true` quand la personne a confirmé sa venue. Sinon, elle n'apparaît pas sur le site public. |
 
 Pour un refus, il suffit de retirer la ligne de l'invité.
